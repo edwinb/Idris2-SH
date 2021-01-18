@@ -49,8 +49,17 @@ Language and compiler changes:
   definitions can be searched in auto implicit search.
   + Note, though, that there are still some known limitations (with both local
     hints and local implementations) which will be resolved in the next version.
+
+* Added new syntax for positional implicit arguments in lambda expressions:
+
+     `\exparg1, ${1 imparg1 : imptype, ...}, exparg2, ... => ...`
+
+* Added primitives to the parsing library used in the compiler to get more precise
+  boundaries to the AST nodes `FC`.
+
 * New experimental ``refc`` code generator, which generates C with reference
   counting.
+
 * Added primitives to the parsing library used in the compiler to get more precise
   boundaries to the AST nodes `FC`.
 

@@ -512,8 +512,12 @@ mutual
         = "{default " ++ showPrec App t ++ " " ++ showCount rig ++ "_ : " ++ showPrec d arg ++ "} -> " ++ showPrec d ret
     showPrec d (PPi _ rig (DefImplicit t) (Just n) arg ret)
         = "{default " ++ showPrec App t ++ " " ++ showCount rig ++ showPrec d n ++ " : " ++ showPrec d arg ++ "} -> " ++ showPrec d ret
+    showPrec d (PLam _ rig Implicit n (PImplicit _) sc)
+        = "\\${" ++ showCount rig ++ showPrec d n ++ "} => " ++ showPrec d sc
     showPrec d (PLam _ rig _ n (PImplicit _) sc)
         = "\\" ++ showCount rig ++ showPrec d n ++ " => " ++ showPrec d sc
+    showPrec d (PLam _ rig Implicit n ty sc)
+        = "\\${" ++ showCount rig ++ showPrec d n ++ " : " ++ showPrec d ty ++ "} => " ++ showPrec d sc
     showPrec d (PLam _ rig _ n ty sc)
         = "\\" ++ showCount rig ++ showPrec d n ++ " : " ++ showPrec d ty ++ " => " ++ showPrec d sc
     showPrec d (PLet _ rig n (PImplicit _) val sc alts)

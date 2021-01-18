@@ -1,0 +1,7 @@
+:set showtypes
+:set showimplicits
+:t justShowAll_rhs
+\x : Nat, ${z : Nat} => x
+\x : Nat, ${1 z : Nat, 0 w : String} => z
+\1 b : Nat, ${z, w}, y, ${a} => b
+:q

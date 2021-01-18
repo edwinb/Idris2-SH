@@ -433,16 +433,27 @@ mutual
            = PPi (boundToFC fname n) rig p (n.val) ty (pibindAll fname p rest scope)
 
   bindList : FileName -> IndentInfo ->
-             Rule (List (RigCount, WithBounds PTerm, PTerm))
+             Rule (List (RigCount, PiInfo PTerm, WithBounds PTerm, PTerm))
   bindList fname indents
-      = sepBy1 (symbol ",")
-               (do rigc <- multiplicity
-                   pat <- bounds (simpleExpr fname indents)
-                   ty <- option
-                            (PInfer (boundToFC fname pat))
-                            (symbol ":" *> opExpr pdef fname indents)
-                   rig <- getMult rigc
-                   pure (rig, pat, ty))
+      = concat <$> sepBy1 (symbol ",")
+               ((do rigc <- multiplicity
+                    pat <- bounds (simpleExpr fname indents)
+                    ty <- option
+                             (PInfer (boundToFC fname pat))
+                             (symbol ":" *> opExpr pdef fname indents)
+                    rig <- getMult rigc
+                    pure [(rig, Explicit, pat, ty)])
+                <|> (do start <- symbol "${"
+                        ns <- sepBy1 (symbol ",") (do
+                          rigc <- multiplicity
+                          pat <- bounds (simpleExpr fname indents)
+                          ty <- option
+                                   (PInfer (boundToFC fname pat))
+                                   (symbol ":" *> opExpr pdef fname indents)
+                          rig <- getMult rigc
+                          pure (rig, Implicit, pat, ty))
+                        end <- symbol "}"
+                        pure ns))
 
   pibindListName : FileName -> IndentInfo ->
                    Rule (List (RigCount, WithBounds Name, PTerm))
@@ -542,11 +553,10 @@ mutual
 
      where
 
-       bindAll : List (RigCount, WithBounds PTerm, PTerm) -> PTerm -> PTerm
+       bindAll : List (RigCount, PiInfo PTerm, WithBounds PTerm, PTerm) -> PTerm -> PTerm
        bindAll [] scope = scope
-       bindAll ((rig, pat, ty) :: rest) scope
-           = PLam (boundToFC fname pat) rig Explicit pat.val ty
-                  (bindAll rest scope)
+       bindAll ((rig, p, pat, ty) :: rest) scope =
+         PLam (boundToFC fname pat) rig p pat.val ty (bindAll rest scope)
 
        continueLam : Rule PTerm
        continueLam = do

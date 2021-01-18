@@ -182,20 +182,24 @@ mutual
       go d (PPi _ rig (DefImplicit t) (Just n) arg ret) =
         parenthesise (d > startPrec) $ group $
           braces (default_ <++> go appPrec t <++> prettyRig rig <+> pretty n <++> colon <++> go startPrec arg) <++> "->" <+> line <+> go startPrec ret
-      go d (PLam _ rig _ n ty sc) =
-          let (ns, sc) = getLamNames [(rig, n, ty)] sc in
+      go d (PLam _ rig p n ty sc) =
+          let (ns, sc) = getLamNames [(rig, p, n, ty)] sc in
               parenthesise (d > startPrec) $ group $ align $ hang 2 $
                 backslash <+> prettyBindings ns <++> "=>" <+> line <+> go startPrec sc
         where
-          getLamNames : List (RigCount, PTerm, PTerm) -> PTerm -> (List (RigCount, PTerm, PTerm), PTerm)
-          getLamNames acc (PLam _ rig _ n ty sc) = getLamNames ((rig, n, ty) :: acc) sc
+          getLamNames : List (RigCount, PiInfo PTerm, PTerm, PTerm) -> PTerm -> (List (RigCount, PiInfo PTerm, PTerm, PTerm), PTerm)
+          getLamNames acc (PLam _ rig p n ty sc) = getLamNames ((rig, p, n, ty) :: acc) sc
           getLamNames acc sc = (reverse acc, sc)
-          prettyBindings : List (RigCount, PTerm, PTerm) -> Doc IdrisAnn
+          prettyBindings : List (RigCount, PiInfo PTerm, PTerm, PTerm) -> Doc IdrisAnn
           prettyBindings [] = neutral
-          prettyBindings [(rig, n, (PImplicit _))] = prettyRig rig <+> go startPrec n
-          prettyBindings [(rig, n, ty)] = prettyRig rig <+> go startPrec n <++> colon <++> go startPrec ty
-          prettyBindings ((rig, n, (PImplicit _)) :: ns) = prettyRig rig <+> go startPrec n <+> comma <+> line <+> prettyBindings ns
-          prettyBindings ((rig, n, ty) :: ns) = prettyRig rig <+> go startPrec n <++> colon <++> go startPrec ty <+> comma <+> line <+> prettyBindings ns
+          prettyBindings [(rig, Implicit, n, (PImplicit _))] = "$" <+> braces (prettyRig rig <+> go startPrec n)
+          prettyBindings [(rig, Implicit, n, ty)] = "$" <+> braces (prettyRig rig <+> go startPrec n <++> colon <++> go startPrec ty)
+          prettyBindings [(rig, p, n, (PImplicit _))] = prettyRig rig <+> go startPrec n
+          prettyBindings [(rig, p, n, ty)] = prettyRig rig <+> go startPrec n <++> colon <++> go startPrec ty
+          prettyBindings ((rig, Implicit, n, (PImplicit _)) :: ns) = "$" <+> braces (prettyRig rig <+> go startPrec n) <+> comma <+> line <+> prettyBindings ns
+          prettyBindings ((rig, Implicit, n, ty) :: ns) = "$" <+> braces (prettyRig rig <+> go startPrec n) <++> colon <++> go startPrec ty <+> comma <+> line <+> prettyBindings ns
+          prettyBindings ((rig, p, n, (PImplicit _)) :: ns) = prettyRig rig <+> go startPrec n <+> comma <+> line <+> prettyBindings ns
+          prettyBindings ((rig, p, n, ty) :: ns) = prettyRig rig <+> go startPrec n <++> colon <++> go startPrec ty <+> comma <+> line <+> prettyBindings ns
       go d (PLet _ rig n (PImplicit _) val sc alts) =
         parenthesise (d > startPrec) $ group $ align $
           let_ <++> (group $ align $ hang 2 $ prettyRig rig <+> go startPrec n <++> equals <+> line <+> go startPrec val) <+> line

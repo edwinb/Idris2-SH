@@ -1,0 +1,9 @@
+1/1: Building Test (Test.idr)
+Main> Main> Main>    x : Nat
+   y : Nat
+------------------------------
+justShowAll_rhs : Vect x (Vect y Integer) -> Vect x (Vect y String)
+Main> \x : Nat, ${z : Nat} => x : Nat -> {_ : Nat} -> Nat
+Main> \x : Nat, ${1 z} : Nat, ${0 w : String} => z : Nat -> {1 _ : Nat} -> {0 _ : String} -> Nat
+Main> \1 b : Nat, ${z} : ?_, ${w} : ?_, y : ?_, ${a : ?_} => b : (1 b : Nat) -> {z : ?_} -> {w : ?_} -> (y : ?_) -> {_ : ?_} -> Nat
+Main> Bye for now!

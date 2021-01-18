@@ -579,6 +579,35 @@ Idris 1 took a different approach here: names which were parameters to data
 types were in scope, other names were not. The Idris 2 approach is, we hope,
 more consistent and easier to understand.
 
+.. _sect-imp-lambda-args:
+
+Positional implicit lambda arguments
+-------------------------
+
+In Idris2 you can now declare positional implicit arguments for lambda expressions,
+where positional means that whichever names you choose for the arguments, the i-th
+positional implicit argument will always correspond to the i-th implicit binder in
+the type of the lambda:
+
+.. code-block:: idris
+
+    \${1 len : Nat}, val => replicate len val
+
+As for explicit arguments, you can specify the multiplicity and the type
+also for positional implicit arguments, and the two type of arguments can be
+interleaved:
+
+.. code-block:: idris
+
+    \exp1, ${imp1}, exp2, ${imp2}, ..., ${imp3} => ...
+
+Sequence of consecutive positional implicit arguments can be grouped in a single pair
+of braces:
+
+.. code-block:: idris
+
+    \exp1, ${imp1, imp2 : Type, 1 imp3, 0 imp4 : Type}, exp2, ${imp5} => ...
+
 .. _sect-app-syntax-additions:
 
 Function application syntax additions

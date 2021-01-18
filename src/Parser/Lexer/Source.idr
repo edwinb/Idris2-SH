@@ -186,10 +186,11 @@ export
 symbols : List String
 symbols
     = [".(", -- for things such as Foo.Bar.(+)
-       "@{",
+       "@{", "${",
        "[|", "|]",
        "(", ")", "{", "}}", "}", "[", "]", ",", ";", "_",
-       "`(", "`{{", "`[", "`"]
+       "`(", "`{{", "`[", "`",
+       "\\"]
 
 export
 isOpChar : Char -> Bool
@@ -203,7 +204,7 @@ export
 reservedSymbols : List String
 reservedSymbols
     = symbols ++
-      ["%", "\\", ":", "=", ":=", "|", "|||", "<-", "->", "=>", "?", "!",
+      ["%", ":", "=", ":=", "|", "|||", "<-", "->", "=>", "?", "!",
        "&", "**", "..", "~"]
 
 fromBinLit : String -> Integer
