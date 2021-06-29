@@ -1,14 +1,15 @@
 name: Nix
-
 on:
-  workflow_run:
-    workflows: ["Quick check"]
-    types:
-      - completed
-
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - master
 jobs:
   tests:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

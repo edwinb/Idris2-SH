@@ -1,10 +1,13 @@
 name: macOS Combined Chez
-
 on:
-  workflow_run:
-    workflows: ["Quick check"]
-    types:
-      - completed
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
 
 env:
   SCHEME: chez
@@ -14,7 +17,6 @@ jobs:
   # Building the executable
 
   build-bootstrap-chez:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -38,6 +40,9 @@ jobs:
   self-host-chez:
     needs: build-bootstrap-chez
     runs-on: macos-latest
+    env:
+      IDRIS2_CG: chez
+      IDRIS2_FLAGS: -Werror -Xcheck-hashes
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -52,8 +57,26 @@ jobs:
           brew install coreutils
           echo "$HOME/.idris2/bin" >> $GITHUB_PATH
           chmod +x $HOME/.idris2/bin/idris2 $HOME/.idris2/bin/idris2_app/*
+
+      - name: Set TTC_VERSION for Cache
+        run: echo "TTC_VERSION=$(grep -P "ttcVersion = \K\d+" src/Core/Binary.idr -o)" >> $GITHUB_ENV
+      - name: Cache Idris2 Self Host from Previous Version Build
+        uses: actions/cache@v2
+        with:
+          path: |
+            build/
+            libs/base/build/
+            libs/prelude/build/
+            libs/contrib/build/
+            libs/network/build/
+            libs/test/build/
+          key: ${{ runner.os }}-self-host-chez-${{ github.ref }}-${{ env.TTC_VERSION }}-${{ env.GITHUB_SHA }}
+          restore-keys: |
+            ${{ runner.os }}-self-host-chez-refs/heads/main-${{ env.TTC_VERSION }}
+            ${{ runner.os }}-self-host-chez-refs/heads/master-${{ env.TTC_VERSION }}
+
       - name: Build self-hosted
-        run: make all IDRIS2_BOOT="idris2 -Werror" && make install
+        run: make all && make install
         shell: bash
       - name: Test self-hosted
         run: make test INTERACTIVE=''
