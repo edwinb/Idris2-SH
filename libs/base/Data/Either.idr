@@ -1,5 +1,6 @@
 module Data.Either
 
+import public Control.Function
 import Data.List1
 
 %default total
@@ -120,10 +121,10 @@ eitherToMaybe (Right x) = Just x
 
 ||| Left is injective
 export
-leftInjective : Left x = Left y -> x = y
-leftInjective Refl = Refl
+Injective Left where
+  injective Refl = Refl
 
 ||| Right is injective
 export
-rightInjective : Right x = Right y -> x = y
-rightInjective Refl = Refl
+Injective Right where
+  injective Refl = Refl

@@ -2,6 +2,7 @@ module Data.Nat
 
 import public Control.Relation
 import public Control.Order
+import public Control.Function
 
 %default total
 
@@ -275,8 +276,8 @@ eqSucc : (0 left, right : Nat) -> left = right -> S left = S right
 eqSucc _ _ Refl = Refl
 
 export
-succInjective : (0 left, right : Nat) -> S left = S right -> left = right
-succInjective _ _ Refl = Refl
+Injective S where
+  injective Refl = Refl
 
 ||| A definition of non-zero with a better behaviour than `Not (x = Z)`
 ||| This is amenable to proof search and `NonZero Z` is more readily
@@ -445,7 +446,7 @@ plusLeftCancel : (left, right, right' : Nat) ->
   left + right = left + right' -> right = right'
 plusLeftCancel Z _ _ p = p
 plusLeftCancel (S left) right right' p =
-    plusLeftCancel left right right' (succInjective _ _ p)
+    plusLeftCancel left right right' $ injective p
 
 export
 plusRightCancel : (left, left', right : Nat) ->

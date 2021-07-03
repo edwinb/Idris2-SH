@@ -1,5 +1,6 @@
 module Data.Fin
 
+import Control.Function
 import Data.List1
 import public Data.Maybe
 import Data.Nat
@@ -22,7 +23,7 @@ public export
 coerce : {n : Nat} -> (0 eq : m = n) -> Fin m -> Fin n
 coerce {n = S _} eq FZ = FZ
 coerce {n = Z} eq FZ impossible
-coerce {n = S _} eq (FS k) = FS (coerce (succInjective _ _ eq) k)
+coerce {n = S _} eq (FS k) = FS (coerce (injective eq) k)
 coerce {n = Z} eq (FS k) impossible
 
 %transform "coerce-identity" coerce = replace {p = Fin}
@@ -45,8 +46,8 @@ Uninhabited (n = m) => Uninhabited (FS n = FS m) where
   uninhabited Refl @{nm} = uninhabited Refl @{nm}
 
 export
-fsInjective : FS m = FS n -> m = n
-fsInjective Refl = Refl
+Injective FS where
+  injective Refl = Refl
 
 export
 Eq (Fin n) where
@@ -72,7 +73,7 @@ finToNatInjective FZ     FZ     _    = Refl
 finToNatInjective (FS _) FZ     Refl impossible
 finToNatInjective FZ     (FS _) Refl impossible
 finToNatInjective (FS m) (FS n) prf  =
-  cong FS $ finToNatInjective m n $ succInjective (finToNat m) (finToNat n) prf
+  cong FS $ finToNatInjective m n $ injective prf
 
 export
 Cast (Fin n) Nat where
@@ -191,7 +192,7 @@ DecEq (Fin n) where
   decEq (FS f) (FS f')
       = case decEq f f' of
              Yes p => Yes $ cong FS p
-             No p => No $ p . fsInjective
+             No p => No $ p . injective
 
 namespace Equality
 
