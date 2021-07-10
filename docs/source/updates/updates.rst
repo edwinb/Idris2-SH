@@ -821,6 +821,40 @@ Another novelty - new update syntax (previous one still functional):
 The ``record`` keyword has been discarded for brevity, symbol ``:=`` replaces ``=``
 in order to not introduce any ambiguity.
 
+Pattern synonyms
+----------------
+
+Pattern synonyms can be introduced for already defined function via the `%pattern_synonym` directive:
+
+.. code-block:: idris
+
+    JustPair : a -> b -> Maybe (a, b)
+    JustPair x y = Just (x, y)
+
+    %pattern_synonym JustPair
+
+    first : Maybe (a, b) -> Maybe a
+    first (JustPair x _) = Just x
+    first _ = Nothing
+
+    FOO : String
+    FOO = "Foo"
+
+    %pattern_synonym FOO
+
+    isFoo : String -> Bool
+    isFoo FOO = True
+    isFoo _ = False
+
+Idris2 only supports implicit bidirectional pattern synonyms, which since are defined as regular functions
+can be used both as expressions, and as synonyms on the LHS of definitions. Additional requirements are:
+
+1. the function must be total;
+
+2. the function definition must have a single pattern-matching clause;
+
+3. the function must have only variable bindings on the LHS, or no arguments at all.
+
 Generate definition
 -------------------
 

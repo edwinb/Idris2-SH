@@ -1091,6 +1091,7 @@ record Defs where
      -- ^ A mapping from names to transformations resulting from a %builtin pragma
      -- seperate to `transforms` because these must always fire globally so run these
      -- when compiling to `CExp`.
+  patternSynonyms : NameMap ()
   namedirectives : NameMap (List String)
   ifaceHash : Int
   importHashes : List (Namespace, Int)
@@ -1161,6 +1162,7 @@ initDefs
            , transforms = empty
            , saveTransforms = []
            , builtinTransforms = initBuiltinTransforms
+           , patternSynonyms = empty
            , namedirectives = empty
            , ifaceHash = 5381
            , importHashes = []

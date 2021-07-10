@@ -1,0 +1,5 @@
+foobar FOO
+foobar "Bar"
+foobar ""
+collectArgs1 (App "->" [App "arg1" [], App "->" [App "arg2" [], App "arg3" []]])
+:q

@@ -31,7 +31,7 @@ import public Libraries.Utils.Binary
 ||| (Increment this when changing anything in the data format)
 export
 ttcVersion : Int
-ttcVersion = 57
+ttcVersion = 58
 
 export
 checkTTCVersion : String -> Int -> Int -> Core ()
@@ -59,6 +59,7 @@ record TTCFile extra where
   namedirectives : List (Name, List String)
   cgdirectives : List (CG, String)
   transforms : List (Name, Transform)
+  patSynonyms : List Name
   extraData : extra
 
 HasNames a => HasNames (List a) where
@@ -98,7 +99,7 @@ HasNames e => HasNames (TTCFile e) where
                       autoHints typeHints
                       imported nextVar currentNS nestedNS
                       pairnames rewritenames primnames
-                      namedirectives cgdirectives trans
+                      namedirectives cgdirectives trans patts
                       extra)
       = pure $ MkTTCFile version sourceHash ifaceHash iHashes incData
                          context userHoles
@@ -111,6 +112,7 @@ HasNames e => HasNames (TTCFile e) where
                          !(full gam namedirectives)
                          cgdirectives
                          !(full gam trans)
+                         !(full gam patts)
                          !(full gam extra)
     where
       fullPair : Context -> Maybe PairNames -> Core (Maybe PairNames)
@@ -136,7 +138,7 @@ HasNames e => HasNames (TTCFile e) where
                       autoHints typeHints
                       imported nextVar currentNS nestedNS
                       pairnames rewritenames primnames
-                      namedirectives cgdirectives trans
+                      namedirectives cgdirectives trans patts
                       extra)
       = pure $ MkTTCFile version sourceHash ifaceHash iHashes incData
                          context userHoles
@@ -149,6 +151,7 @@ HasNames e => HasNames (TTCFile e) where
                          !(resolved gam namedirectives)
                          cgdirectives
                          !(resolved gam trans)
+                         !(resolved gam patts)
                          !(resolved gam extra)
     where
       resolvedPair : Context -> Maybe PairNames -> Core (Maybe PairNames)
@@ -196,6 +199,7 @@ writeTTCFile b file_in
            toBuf b (namedirectives file)
            toBuf b (cgdirectives file)
            toBuf b (transforms file)
+           toBuf b (patSynonyms file)
 
 readTTCFile : TTC extra =>
               {auto c : Ref Ctxt Defs} ->
@@ -219,7 +223,7 @@ readTTCFile readall file as b
                                    0 (mkNamespace "") [] Nothing
                                    Nothing
                                    (MkPrimNs Nothing Nothing Nothing Nothing)
-                                   [] [] [] ex)
+                                   [] [] [] [] ex)
               else do
                  defs <- fromBuf b
                  uholes <- fromBuf b
@@ -234,10 +238,11 @@ readTTCFile readall file as b
                  nds <- fromBuf b
                  cgds <- fromBuf b
                  trans <- fromBuf b
+                 patts <- fromBuf b
                  pure (MkTTCFile ver sourceFileHash ifaceHash importHashes incData
                                  (map (replaceNS cns) defs) uholes
                                  autohs typehs imp nextv cns nns
-                                 pns rws prims nds cgds trans ex)
+                                 pns rws prims nds cgds trans patts ex)
   where
     -- We don't store full names in 'defs' - we remove the namespace if it's
     -- the same as the current namespace. So, this puts it back.
@@ -296,6 +301,7 @@ writeToTTC extradata sourceFileName ttcFileName
                               (NameMap.toList (namedirectives defs))
                               (cgdirectives defs)
                               (saveTransforms defs)
+                              (keys (patternSynonyms defs))
                               extradata)
 
          Right ok <- coreLift $ writeToFile ttcFileName !(get Bin)
@@ -346,6 +352,13 @@ addAutoHint (hintn_in, d)
          hintn <- toResolvedNames hintn_in
 
          put Ctxt (record { autoHints $= insert hintn d } defs)
+
+addPattern : {auto c : Ref Ctxt Defs} ->
+                Name -> Core ()
+addPattern n
+    = do defs <- get Ctxt
+         n' <- toResolvedNames n
+         put Ctxt (record { patternSynonyms $= insert n' () } defs)
 
 export
 updatePair : {auto c : Ref Ctxt Defs} ->
@@ -478,6 +491,8 @@ readFromTTC nestedns loc reexp fname modNS importAs
                     updateNameDirectives (reverse (namedirectives ttc))
                     updateCGDirectives (cgdirectives ttc)
                     updateTransforms (transforms ttc)
+                    traverse_ addPattern (patSynonyms ttc)
+
 
                when (not reexp) clearSavedHints
                resetFirstEntry

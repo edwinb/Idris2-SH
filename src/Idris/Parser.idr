@@ -1203,6 +1203,10 @@ directive fname indents
                        (decoratedSimpleBinderName fname)
          atEnd indents
          pure (Names n (forget ns))
+  <|> do decorate fname Keyword $ pragma "pattern_synonym"
+         n <- name
+         atEnd indents
+         pure (PatternSynonym n)
   <|> do decorate fname Keyword $ pragma "start"
          e <- expr pdef fname indents
          atEnd indents

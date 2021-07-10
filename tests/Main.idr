@@ -108,6 +108,10 @@ idrisTestsLiterate = MkTestPool "Literate programming" [] Nothing
        "literate009", "literate010", "literate011", "literate012",
        "literate013", "literate014", "literate015", "literate016"]
 
+idrisTestsPattern : TestPool
+idrisTestsPattern = MkTestPool "Pattern synonyms" [] Nothing
+      ["pattern001"]
+
 idrisTestsPerformance : TestPool
 idrisTestsPerformance = MkTestPool "Performance" [] Nothing
        -- Performance: things which have been slow in the past, or which
@@ -324,6 +328,7 @@ main = runner $
   , testPaths "idris2" idrisTestsInterface
   , testPaths "idris2" idrisTestsLiterate
   , testPaths "idris2" idrisTestsLinear
+  , testPaths "idris2" idrisTestsPattern
   , testPaths "idris2" idrisTestsPerformance
   , testPaths "idris2" idrisTestsRegression
   , testPaths "idris2" idrisTestsData

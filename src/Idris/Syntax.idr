@@ -268,6 +268,7 @@ mutual
        AutoImplicitDepth : Nat -> Directive
        NFMetavarThreshold : Nat -> Directive
        SearchTimeout : Integer -> Directive
+       PatternSynonym : Name -> Directive
 
   public export
   data PField : Type where

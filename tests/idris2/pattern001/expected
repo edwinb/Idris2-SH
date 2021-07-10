@@ -1,0 +1,61 @@
+1/1: Building Test (Test.idr)
+Warning: Unreachable clause: arrow3 t1 t2
+
+Test:38:1--38:13
+ 34 | %pattern_synonym arrow2
+ 35 | 
+ 36 | arrow3 : Typ -> Typ -> Typ
+ 37 | arrow3 t1 t2 = App "->" [t1, t2]
+ 38 | arrow3 t1 t2 = App "->" [t1, t2]
+      ^^^^^^^^^^^^
+
+Error: Pattern synonym must be total
+
+Test:34:1--34:24
+ 30 | collectArgs1 t = [t]
+ 31 | 
+ 32 | arrow2 : Typ -> Typ -> Typ
+ 33 | arrow2 (App "F" [t1]) t2 = App "->" [t1, t2]
+ 34 | %pattern_synonym arrow2
+      ^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: Pattern synonym must have a single definition, instead found 2
+
+Test:39:1--39:24
+ 35 | 
+ 36 | arrow3 : Typ -> Typ -> Typ
+ 37 | arrow3 t1 t2 = App "->" [t1, t2]
+ 38 | arrow3 t1 t2 = App "->" [t1, t2]
+ 39 | %pattern_synonym arrow3
+      ^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: LHS of pattern synonym must contain only bindings
+
+Test:43:1--43:24
+ 39 | %pattern_synonym arrow3
+ 40 | 
+ 41 | arrow4 : Typ -> Typ -> Typ
+ 42 | arrow4 (App s t1) t2 = App "->" (t2 :: t1)
+ 43 | %pattern_synonym arrow4
+      ^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: arrow2 is not covering.
+
+Test:32:1--32:27
+ 28 | collectArgs1 : Typ -> List Typ
+ 29 | collectArgs1 (arrow1 t1 t2) = t1 :: (collectArgs1 t2)
+ 30 | collectArgs1 t = [t]
+ 31 | 
+ 32 | arrow2 : Typ -> Typ -> Typ
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Missing cases:
+    arrow2 (App "F" (_ :: (_ :: _))) _
+    arrow2 (App "F" []) _
+    arrow2 (App _ _) _
+
+Main> True
+Main> True
+Main> False
+Main> [App "arg1" [], App "arg2" [], App "arg3" []]
+Main> Bye for now!

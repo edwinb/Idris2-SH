@@ -6,6 +6,7 @@ import Core.Core
 import Core.Env
 import Core.Metadata
 import Core.Options
+import Core.Pattern
 import Core.TT
 import Core.Unify
 
@@ -1028,6 +1029,7 @@ mutual
              Overloadable n => pure [IPragma [] (\nest, env => setNameFlag fc n Overloadable)]
              Extension e => pure [IPragma [] (\nest, env => setExtension e)]
              DefaultTotality tot => pure [IPragma [] (\_, _ => setDefaultTotalityOption tot)]
+             PatternSynonym n => pure [IPragma [] (\nest, env => addImplicitPattern fc n)]
   desugarDecl ps (PBuiltin fc type name) = pure [IBuiltin fc type name]
 
   export

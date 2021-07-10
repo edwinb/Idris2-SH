@@ -10,6 +10,7 @@ import Core.Primitives
 import Core.TT
 import Core.Value
 
+import Libraries.Data.NameMap
 import Libraries.Data.IntMap
 import Data.List
 import Data.Maybe
@@ -1460,27 +1461,32 @@ normaliseErr err = pure err
 
 
 -- If the term is an application of a primitive conversion (fromInteger etc)
--- and it's applied to a constant, fully normalise the term.
+-- and it's applied to a constant, or is an application of a function
+-- tagged as lhs pattern, fully normalise the term.
 export
-normalisePrims : {auto c : Ref Ctxt Defs} -> {vs : _} ->
-                 -- size heuristic for when to unfold
-                 (Constant -> Bool) ->
-                 -- view to check whether an argument is a constant
-                 (arg -> Maybe Constant) ->
-                 -- Reduce everything (True) or just public export (False)
-                 Bool ->
-                 -- list of primitives
-                 List Name ->
-                 -- view of the potential redex
-                 (n : Name) ->          -- function name
-                 (args : List arg) ->   -- arguments from inside out (arg1, ..., argk)
-                 -- actual term to evaluate if needed
-                 (tm : Term vs) ->      -- original term (n arg1 ... argk)
-                 Env Term vs ->         -- evaluation environment
-                 -- output only evaluated if primitive
-                 Core (Maybe (Term vs))
-normalisePrims boundSafe viewConstant all prims n args tm env
-   = do let True = elem (dropNS !(getFullName n)) prims -- is a primitive
+normalisePrimsOrPattern : {auto c : Ref Ctxt Defs} -> {vs : _} ->
+                          -- size heuristic for when to unfold
+                          (Constant -> Bool) ->
+                          -- view to check whether an argument is a constant
+                          (arg -> Maybe Constant) ->
+                          -- Reduce everything (True) or just public export (False)
+                          Bool ->
+                          -- list of primitives
+                          List Name ->
+                          -- view of the potential redex
+                          (n : Name) ->          -- function name
+                          (args : List arg) ->   -- arguments from inside out (arg1, ..., argk)
+                          -- actual term to evaluate if needed
+                          (tm : Term vs) ->      -- original term (n arg1 ... argk)
+                          Env Term vs ->         -- evaluation environment
+                          -- output only evaluated if primitive
+                          Core (Maybe (Term vs))
+normalisePrimsOrPattern boundSafe viewConstant all prims n args tm env
+   = do defs <- get Ctxt
+        let norm = if all then normaliseAll else normalise
+        let False = isJust $ lookup !(toResolvedNames n) defs.patternSynonyms
+              | _ => Just <$> norm defs env tm -- is a LHS pattern
+        let True = elem (dropNS !(getFullName n)) prims -- is a primitive
               | _ => pure Nothing
         let (mc :: _) = reverse args -- with at least one argument
               | _ => pure Nothing
@@ -1488,8 +1494,4 @@ normalisePrims boundSafe viewConstant all prims n args tm env
               | _ => pure Nothing
         let True = boundSafe c -- that we should expand
               | _ => pure Nothing
-        defs <- get Ctxt
-        tm <- if all
-                 then normaliseAll defs env tm
-                 else normalise defs env tm
-        pure (Just tm)
+        Just <$> norm defs env tm

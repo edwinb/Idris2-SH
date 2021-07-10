@@ -18,6 +18,7 @@ import TTImp.TTImp
 import Data.List
 import Data.String
 
+import Libraries.Data.NameMap
 import Libraries.Data.StringMap
 
 %default covering
@@ -49,12 +50,13 @@ expandAmbigName mode nest env orig args (IVar fc x) exp
                   Nothing =>
                      do est <- get EST
                         primNs <- getPrimNames
+                        let patts = patternSynonyms defs
                         let prims = primNamesToList primNs
-                        let primApp = isPrimName prims x
+                        let prim = isPrimName prims x
                         case lookupUN (userNameRoot x) (unambiguousNames est) of
                           Just xr => do
                             log "elab.ambiguous" 10 $ "unambiguous: " ++ show (fst xr)
-                            pure $ mkAlt primApp est xr
+                            pure $ mkAlt prim (isLHSPattern xr patts) est xr
                           Nothing => do
                             ns <- lookupCtxtName x (gamma defs)
                             ns' <- filterM visible ns
@@ -63,10 +65,10 @@ expandAmbigName mode nest env orig args (IVar fc x) exp
                                         pure orig
                                [nalt] =>
                                      do log "elab.ambiguous" 10 $ "Only one " ++ show (fst nalt)
-                                        pure $ mkAlt primApp est nalt
-                               nalts => pure $ IAlternative fc
-                                                      (uniqType primNs x args)
-                                                      (map (mkAlt primApp est) nalts)
+                                        pure $ mkAlt prim (isLHSPattern nalt patts) est nalt
+                               nalts =>
+                                     do let alts = map (\n => mkAlt prim (isLHSPattern n patts) est n) nalts
+                                        pure $ IAlternative fc (uniqType primNs x args) alts
   where
     lookupUN : Maybe String -> StringMap a -> Maybe a
     lookupUN Nothing _ = Nothing
@@ -80,6 +82,9 @@ expandAmbigName mode nest env orig args (IVar fc x) exp
                 then pure $ visibleInAny (!getNS :: !getNestedNS) (NS ns x)
                                          (visibility def)
                 else pure False
+
+    isLHSPattern : (Name, Int, GlobalDef) -> NameMap () -> Bool
+    isLHSPattern (_, i, _) patterns = isJust $ lookup (Resolved i) patterns
 
     -- If there's multiple alternatives and all else fails, resort to using
     -- the primitive directly
@@ -110,26 +115,26 @@ expandAmbigName mode nest env orig args (IVar fc x) exp
         = dropNS fn == p || isPrimName ps fn
 
     -- If it's not a constructor application, dot it
-    wrapDot : Bool -> EState vars ->
+    wrapDot : Bool -> Bool -> EState vars ->
               ElabMode -> Name -> List RawImp -> Def -> RawImp -> RawImp
-    wrapDot _ _ _ _ _ (DCon _ _ _) tm = tm
-    wrapDot _ _ _ _ _ (TCon _ _ _ _ _ _ _ _) tm = tm
+    wrapDot _ _ _ _ _ _ (DCon _ _ _) tm = tm
+    wrapDot _ _ _ _ _ _ (TCon _ _ _ _ _ _ _ _) tm = tm
     -- Leave primitive applications alone, because they'll be inlined
     -- before compiling the case tree
-    wrapDot prim est (InLHS _) n' [arg] _ tm
-       = if n' == Resolved (defining est) || prim
+    wrapDot prim pat est (InLHS _) n' [arg] _ tm
+       = if n' == Resolved (defining est) || prim || pat
             then tm
             else IMustUnify fc NotConstructor tm
-    wrapDot prim est (InLHS _) n' _ _ tm
-       = if n' == Resolved (defining est)
+    wrapDot prim pat est (InLHS _) n' _ _ tm
+       = if n' == Resolved (defining est) || pat
             then tm
             else IMustUnify fc NotConstructor tm
-    wrapDot _ _ _ _ _ _ tm = tm
+    wrapDot _ _ _ _ _ _ _ tm = tm
 
 
-    mkTerm : Bool -> EState vars -> Name -> GlobalDef -> RawImp
-    mkTerm prim est n def
-        = let tm = wrapDot prim est mode n (map (snd . snd) args)
+    mkTerm : Bool -> Bool -> EState vars -> Name -> GlobalDef -> RawImp
+    mkTerm prim pat est n def
+        = let tm = wrapDot prim pat est mode n (map (snd . snd) args)
                        (definition def) (buildAlt (IVar fc n) args) in
               if Macro `elem` flags def
                  then case mode of
@@ -137,9 +142,9 @@ expandAmbigName mode nest env orig args (IVar fc x) exp
                            _ => IRunElab fc (ICoerced fc tm)
                  else tm
 
-    mkAlt : Bool -> EState vars -> (Name, Int, GlobalDef) -> RawImp
-    mkAlt prim est (fullname, i, gdef)
-        = mkTerm prim est (Resolved i) gdef
+    mkAlt : Bool -> Bool -> EState vars -> (Name, Int, GlobalDef) -> RawImp
+    mkAlt prim pat est (fullname, i, gdef)
+        = mkTerm prim pat est (Resolved i) gdef
 
     notLHS : ElabMode -> Bool
     notLHS (InLHS _) = False
