@@ -2,6 +2,7 @@ module System.File
 
 import public Data.Fuel
 
+import Data.Buffer
 import Data.List
 import Data.String
 import System.Info
@@ -407,3 +408,61 @@ chmodRaw fname p
 export
 chmod : HasIO io => String -> Permissions -> io (Either FileError ())
 chmod fname p = chmodRaw fname (mkMode p)
+
+%foreign "C:idris2_readBufferData, libidris2_support, idris_file.h"
+         "RefC:readBufferData"
+         "node:lambda:(f,b,l,m) => require('fs').readSync(f.fd,b,l,m)"
+prim__readBufferData : FilePtr -> Buffer -> Int -> Int -> PrimIO Int
+
+%foreign "C:idris2_writeBufferData, libidris2_support, idris_file.h"
+         "RefC:writeBufferData"
+         "node:lambda:(f,b,l,m) => require('fs').writeSync(f.fd,b,l,m)"
+prim__writeBufferData : FilePtr -> Buffer -> Int -> Int -> PrimIO Int
+
+export
+readBufferData : HasIO io => File -> Buffer ->
+                 (loc : Int) -> -- position in buffer to start adding
+                 (maxbytes : Int) -> -- maximums size to read, which must not
+                                     -- exceed buffer length
+                 io (Either FileError ())
+readBufferData (FHandle h) buf loc max
+    = do read <- primIO (prim__readBufferData h buf loc max)
+         if read >= 0
+            then pure (Right ())
+            else pure (Left FileReadError)
+
+export
+writeBufferData : HasIO io => File -> Buffer ->
+                  (loc : Int) -> -- position in buffer to write from
+                  (maxbytes : Int) -> -- maximums size to write, which must not
+                                      -- exceed buffer length
+                  io (Either FileError ())
+writeBufferData (FHandle h) buf loc max
+    = do written <- primIO (prim__writeBufferData h buf loc max)
+         if written >= 0
+            then pure (Right ())
+            else pure (Left FileWriteError)
+
+export
+writeBufferToFile : HasIO io => String -> Buffer -> Int -> io (Either FileError ())
+writeBufferToFile fn buf max
+    = do Right f <- openFile fn WriteTruncate
+             | Left err => pure (Left err)
+         Right ok <- writeBufferData f buf 0 max
+             | Left err => pure (Left err)
+         closeFile f
+         pure (Right ok)
+
+export
+createBufferFromFile : HasIO io => String -> io (Either FileError Buffer)
+createBufferFromFile fn
+    = do Right f <- openFile fn Read
+             | Left err => pure (Left err)
+         Right size <- fileSize f
+             | Left err => pure (Left err)
+         Just buf <- newBuffer size
+             | Nothing => pure (Left FileReadError)
+         Right ok <- readBufferData f buf 0 size
+             | Left err => pure (Left err)
+         closeFile f
+         pure (Right buf)
