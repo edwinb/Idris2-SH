@@ -17,6 +17,57 @@ import Data.Vect
 
 %default covering
 
+findIndexInt : Int -> Char -> List Char -> Maybe Int
+findIndexInt acc c [] = Nothing
+findIndexInt acc c (c' :: cs) = if c == c'
+    then Just acc
+    else findIndexInt (acc + 1) c cs
+
+-- polynomial rolling hash with constants chosen to match the alphabet
+-- available to idris names.
+total
+hashTypeCon' : String -> Int
+hashTypeCon' = foldl step 0 . fastUnpack
+  where
+    %inline opChars : List Char
+    opChars = fastUnpack ":!#$%&*+./<=>?@\\^|-~"
+
+    %inline charToRange : Char -> Int
+    charToRange c =
+        if c >= 'a' && c <= 'z'
+            then ord c - ord 'a' + 1 else
+        if c >= 'A' && c <= 'Z'
+            then ord c - ord 'A' + 27 else
+        if c >= '0' && c <= '9'
+            then ord c - ord '0' + 53 else
+        fromMaybe (ord c + 83) (findIndexInt 63 c opChars)
+
+    %inline m : Int
+    m = 1000000009
+
+    -- 20 operator symbols + 26 * 2 alpha + 10 numeric = 82 ~= 89
+    %inline p : Int
+    p = 89
+
+    step : Int -> Char -> Int
+    step st c = (st * p + charToRange c) `mod` m
+
+total
+hashTypeCon : Name -> Int
+hashTypeCon = hashTypeCon' . showFull
+  where
+    showFull : Name -> String
+    showFull (NS ns n) = show ns ++ showFull n
+    showFull (UN n) = n
+    showFull (MN n i) = "_MN." ++ n ++ "." ++ show i
+    showFull (PV n i) = "_PV." ++ showFull n ++ "." ++ show i
+    showFull (DN _ n) = showFull n
+    showFull (RF n) = "." ++ n
+    showFull (Nested (x, y) n) = "_N." ++ show x ++ "." ++ show y ++ "." ++ showFull n
+    showFull (CaseBlock n i) = "_CB." ++ n ++ "." ++ show i
+    showFull (WithBlock n i) = "_WB." ++ n ++ "." ++ show i
+    showFull (Resolved i) = "_$." ++ show i
+
 data Args
     = NewTypeBy Nat Nat
     | EraseArgs Nat (List Nat)
@@ -307,7 +358,7 @@ enumTree (CConCase fc sc alts def)
          CConstCase fc sc alts' def
   where
     toEnum : CConAlt vars -> Maybe (CConstAlt vars)
-    toEnum (MkConAlt nm ENUM (Just tag) [] sc)
+    toEnum (MkConAlt nm ENUM tag [] sc)
         = pure $ MkConstAlt (I tag) sc
     toEnum _ = Nothing
 enumTree t = t
@@ -341,9 +392,9 @@ mutual
            fl <- dconFlag cn
            case fl of
                 ENUM => pure $ CPrimVal fc (I tag)
-                _ => pure $ CCon fc cn fl (Just tag) []
+                _ => pure $ CCon fc cn fl tag []
   toCExpTm m n (Ref fc (TyCon tag arity) fn)
-      = pure $ CCon fc fn TYCON Nothing []
+      = pure $ CCon fc fn TYCON (hashTypeCon fn) []
   toCExpTm m n (Ref fc _ fn)
       = do full <- getFullName fn
                -- ^ For readability of output code, and the Nat hack,
@@ -358,7 +409,7 @@ mutual
                           (CLet fc x True !(toCExp m n val) sc')
                           rig
   toCExpTm m n (Bind fc x (Pi _ c e ty) sc)
-      = pure $ CCon fc (UN "->") TYCON Nothing [!(toCExp m n ty),
+      = pure $ CCon fc (UN "->") TYCON (hashTypeCon' "->") [!(toCExp m n ty),
                                     CLam fc x !(toCExp m n sc)]
   toCExpTm m n (Bind fc x b tm) = pure $ CErased fc
   -- We'd expect this to have been dealt with in toCExp, but for completeness...
@@ -376,9 +427,9 @@ mutual
       = let t = constTag c in
             if t == 0
                then pure $ CPrimVal fc c
-               else pure $ CCon fc (UN (show c)) TYCON Nothing []
+               else pure $ CCon fc (UN (show c)) TYCON (hashTypeCon' $ show c) []
   toCExpTm m n (Erased fc _) = pure $ CErased fc
-  toCExpTm m n (TType fc) = pure $ CCon fc (UN "Type") TYCON Nothing []
+  toCExpTm m n (TType fc) = pure $ CCon fc (UN "Type") TYCON (hashTypeCon' "Type") []
 
   toCExp : {vars : _} ->
            {auto c : Ref Ctxt Defs} ->
@@ -412,7 +463,7 @@ mutual
            Just gdef <- lookupCtxtExact x (gamma defs)
                 | Nothing => -- primitive type match
                      do xn <- getFullName x
-                        pure $ MkConAlt xn TYCON Nothing args !(toCExpTree n sc)
+                        pure $ MkConAlt xn TYCON (hashTypeCon xn) args !(toCExpTree n sc)
                                   :: !(conCases n ns)
            case (definition gdef) of
                 DCon _ arity (Just pos) => conCases n ns -- skip it
@@ -422,8 +473,8 @@ mutual
                         sc' <- toCExpTree n sc
                         ns' <- conCases n ns
                         if dcon (definition gdef)
-                           then pure $ MkConAlt xn !(dconFlag xn) (Just tag) args' (shrinkCExp sub sc') :: ns'
-                           else pure $ MkConAlt xn !(dconFlag xn) Nothing args' (shrinkCExp sub sc') :: ns'
+                           then pure $ MkConAlt xn !(dconFlag xn) tag args' (shrinkCExp sub sc') :: ns'
+                           else pure $ MkConAlt xn !(dconFlag xn) (hashTypeCon xn) args' (shrinkCExp sub sc') :: ns'
     where
       dcon : Def -> Bool
       dcon (DCon _ _ _) = True
@@ -767,9 +818,9 @@ toCDef n _ _ (DCon tag arity pos)
                  NewTypeBy ar _ => ar
                  EraseArgs ar erased => ar `minus` length erased
                  Arity ar => ar
-         pure $ MkCon (Just tag) arity' nt
+         pure $ MkCon tag arity' nt
 toCDef n _ _ (TCon tag arity _ _ _ _ _ _)
-    = pure $ MkCon Nothing arity Nothing
+    = pure $ MkCon (hashTypeCon n) arity Nothing
 -- We do want to be able to compile these, but also report an error at run time
 -- (and, TODO: warn at compile time)
 toCDef n ty _ (Hole _ _)

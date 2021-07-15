@@ -5,7 +5,7 @@ Erasable args: []
 Detaggable arg types: []
 Specialise args: []
 Inferrable args: []
-Compiled: Constructor tag Just 0 arity 1 (newtype by 0)
+Compiled: Constructor tag 0 arity 1 (newtype by 0)
 Refers to: []
 Refers to (runtime): []
 Flags: [contype [record]]
@@ -15,7 +15,7 @@ Erasable args: []
 Detaggable arg types: []
 Specialise args: []
 Inferrable args: []
-Compiled: Constructor tag Just 0 arity 1
+Compiled: Constructor tag 0 arity 1
 Refers to: []
 Refers to (runtime): []
 Flags: [contype [record]]

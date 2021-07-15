@@ -257,21 +257,21 @@ tcDoneName gi = MN "TcDone" gi
 conAlt : TcGroup -> TcFunction -> NamedConAlt
 conAlt (MkTcGroup tcIx funs) (MkTcFunction n ix args exp) =
   let name = tcContinueName tcIx ix
-   in MkNConAlt name DATACON (Just ix) args (toTc exp)
+   in MkNConAlt name DATACON ix args (toTc exp)
 
    where mutual
      -- this is returned in case we arrived at a result
      -- (an expression not corresponding to a recursive
      -- call in tail position).
      tcDone : NamedCExp -> NamedCExp
-     tcDone x = NmCon EmptyFC (tcDoneName tcIx) DATACON (Just 0) [x]
+     tcDone x = NmCon EmptyFC (tcDoneName tcIx) DATACON 0 [x]
 
      -- this is returned in case we arrived at a resursive call
      -- in tail position. The index indicates the next "function"
      -- to call, the list of expressions are the function's
      -- arguments.
      tcContinue : (index : Int) -> List NamedCExp -> NamedCExp
-     tcContinue ix = NmCon EmptyFC (tcContinueName tcIx ix) DATACON (Just ix)
+     tcContinue ix = NmCon EmptyFC (tcContinueName tcIx ix) DATACON ix
 
      -- recursively converts an expression. Only the `NmApp` case is
      -- interesting, the rest is pretty much boiler plate.
@@ -314,7 +314,7 @@ convertTcGroup loop g@(MkTcGroup gindex fs) =
         toFun (MkTcFunction n ix args x) =
           let exps  = map local args
               tcArg = NmCon EmptyFC (tcContinueName gindex ix)
-                        DATACON (Just ix) exps
+                        DATACON ix exps
               tcFun = NmRef EmptyFC tcFun
               body  = NmApp EmptyFC (NmRef EmptyFC loop) [tcFun,tcArg]
            in MkFunction n args body

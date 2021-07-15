@@ -66,7 +66,7 @@ mutual
        -- A saturated constructor application
        -- 'ConInfo' gives additional information about the constructor that
        -- a back end might be able to use. It is ignorable.
-       CCon : FC -> Name -> ConInfo -> (tag : Maybe Int) ->
+       CCon : FC -> Name -> ConInfo -> (tag : Int) ->
               List (CExp vars) -> CExp vars
        -- Internally defined primitive operations
        COp : {arity : _} ->
@@ -91,7 +91,7 @@ mutual
   data CConAlt : List Name -> Type where
        -- If no tag, then match by constructor name. Back ends might want to
        -- convert names to a unique integer for performance.
-       MkConAlt : Name -> ConInfo -> (tag : Maybe Int) -> (args : List Name) ->
+       MkConAlt : Name -> ConInfo -> (tag : Int) -> (args : List Name) ->
                   CExp (args ++ vars) -> CConAlt vars
 
   public export
@@ -119,7 +119,7 @@ mutual
        -- A saturated constructor application
        -- 'ConInfo' gives additional information about the constructor that
        -- a back end might be able to use. It is ignoreable.
-       NmCon : FC -> Name -> ConInfo -> (tag : Maybe Int) ->
+       NmCon : FC -> Name -> ConInfo -> (tag : Int) ->
                List NamedCExp -> NamedCExp
        -- Internally defined primitive operations
        NmOp : {arity : _ } -> FC -> PrimFn arity -> Vect arity NamedCExp -> NamedCExp
@@ -141,7 +141,7 @@ mutual
 
   public export
   data NamedConAlt : Type where
-       MkNConAlt : Name -> ConInfo -> (tag : Maybe Int) -> (args : List Name) ->
+       MkNConAlt : Name -> ConInfo -> (tag : Int) -> (args : List Name) ->
                    NamedCExp -> NamedConAlt
 
   public export
@@ -178,7 +178,7 @@ data CDef : Type where
      -- Normal function definition
      MkFun : (args : List Name) -> CExp args -> CDef
      -- Constructor
-     MkCon : (tag : Maybe Int) -> (arity : Nat) -> (nt : Maybe Nat) -> CDef
+     MkCon : (tag : Int) -> (arity : Nat) -> (nt : Maybe Nat) -> CDef
      -- Foreign definition
      MkForeign : (ccs : List String) ->
                  (fargs : List CFType) ->
@@ -193,7 +193,7 @@ data NamedDef : Type where
      -- Normal function definition
      MkNmFun : (args : List Name) -> NamedCExp -> NamedDef
      -- Constructor
-     MkNmCon : (tag : Maybe Int) -> (arity : Nat) -> (nt : Maybe Nat) -> NamedDef
+     MkNmCon : (tag : Int) -> (arity : Nat) -> (nt : Maybe Nat) -> NamedDef
      -- Foreign definition
      MkNmForeign : (ccs : List String) ->
                    (fargs : List CFType) ->

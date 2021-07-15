@@ -31,7 +31,7 @@ data VMInst : Type where
      DECLARE : Reg -> VMInst
      START : VMInst -- start of the main body of the function
      ASSIGN : Reg -> Reg -> VMInst
-     MKCON : Reg -> (tag : Either Int Name) -> (args : List Reg) -> VMInst
+     MKCON : Reg -> (tag : Int) -> (args : List Reg) -> VMInst
      MKCLOSURE : Reg -> Name -> (missing : Nat) -> (args : List Reg) -> VMInst
      MKCONSTANT : Reg -> Constant -> VMInst
 
@@ -43,7 +43,7 @@ data VMInst : Type where
      EXTPRIM : Reg -> Name -> List Reg -> VMInst
 
      CASE : Reg -> -- scrutinee
-            (alts : List (Either Int Name, List VMInst)) -> -- based on constructor tag
+            (alts : List (Int, List VMInst)) -> -- based on constructor tag
             (def : Maybe (List VMInst)) ->
             VMInst
      CONSTCASE : Reg -> -- scrutinee
@@ -159,10 +159,8 @@ toVM t res (AApp fc _ f a)
     = [APPLY res (toReg f) (toReg a)]
 toVM t res (ALet fc var val body)
     = toVM False (Loc var) val ++ toVM t res body
-toVM t res (ACon fc n ci (Just tag) args)
-    = [MKCON res (Left tag) (map toReg args)]
-toVM t res (ACon fc n ci Nothing args)
-    = [MKCON res (Right n) (map toReg args)]
+toVM t res (ACon fc n ci tag args)
+    = [MKCON res tag (map toReg args)]
 toVM t res (AOp fc _ op args)
     = [OP res op (map toReg args)]
 toVM t res (AExtPrim fc _ p args)
@@ -174,11 +172,11 @@ toVM t res (AConCase fc (ALocal scr) [MkAConAlt n ci mt args code] Nothing) -- e
 toVM t res (AConCase fc (ALocal scr) alts def)
     = [CASE (Loc scr) (map toVMConAlt alts) (map (toVM t res) def)]
   where
-    toVMConAlt : AConAlt -> (Either Int Name, List VMInst)
+    toVMConAlt : AConAlt -> (Int, List VMInst)
     toVMConAlt (MkAConAlt n ci tag args code)
        = let body = toVM t res code
              used = foldMap collectUsed body
-          in (maybe (Right n) Left tag, projectArgs scr 0 used args ++ body)
+          in (tag, projectArgs scr 0 used args ++ body)
 toVM t res (AConstCase fc (ALocal scr) alts def)
     = [CONSTCASE (Loc scr) (map toVMConstAlt alts) (map (toVM t res) def)]
   where
@@ -206,7 +204,7 @@ findVars (EXTPRIM (Loc r) _ _) = [r]
 findVars (CASE _ alts d)
     = foldMap findVarAlt alts ++ fromMaybe [] (map (foldMap findVars) d)
   where
-    findVarAlt : (Either Int Name, List VMInst) -> List Int
+    findVarAlt : (Int, List VMInst) -> List Int
     findVarAlt (t, code) = foldMap findVars code
 findVars (CONSTCASE _ alts d)
     = foldMap findConstVarAlt alts ++ fromMaybe [] (map (foldMap findVars) d)

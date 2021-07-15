@@ -160,7 +160,7 @@ mutual
 
   stmt e (NmCon _ n ci tg xs) = do
     (mbxs, args) <- liftArgs xs
-    pure . prepend mbxs $ assign e (ECon (tag n tg) ci args)
+    pure . prepend mbxs $ assign e (ECon tg ci args)
 
   stmt e o@(NmOp _ x xs) =
     case integerArith o of
@@ -228,7 +228,7 @@ mutual
     -- data projections (field accessors). They'll
     -- be then properly inlined when converting `x`.
     projections sc args
-    MkEConAlt (tag n tg) ci <$> stmt e x
+    MkEConAlt tg ci <$> stmt e x
 
   -- a single branch in a pattern match on a constant
   constAlt :  { auto c : Ref ESs ESSt }

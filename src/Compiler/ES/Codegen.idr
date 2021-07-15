@@ -114,9 +114,9 @@ minimal : Minimal -> Doc
 minimal (MVar v)          = var v
 minimal (MProjection n v) = minimal v <+> ".a" <+> shown n
 
-tag2es : Either Int Name -> Doc
-tag2es (Left x)  = shown x
-tag2es (Right x) = jsStringDoc $ show x
+%inline
+tag2es : Int -> Doc
+tag2es x = shown x
 
 constant : Doc -> Doc -> Doc
 constant n d = "const" <++> n <+> softEq <+> d <+> ";"
@@ -139,7 +139,7 @@ applyObj = applyList "{" "}" softComma
 -- Exceptions based on the given `ConInfo`:
 -- `NIL` and `NOTHING`-like data constructors are represented as `{h: 0}`,
 -- while `CONS`, `JUST`, and `RECORD` come without the header field.
-applyCon : ConInfo -> (tag : Either Int Name) -> (args : List Doc) -> Doc
+applyCon : ConInfo -> (tag : Int) -> (args : List Doc) -> Doc
 applyCon NIL     _ [] = "{h" <+> softColon <+> "0}"
 applyCon NOTHING _ [] = "{h" <+> softColon <+> "0}"
 applyCon CONS    _ as = applyObj (conTags as)

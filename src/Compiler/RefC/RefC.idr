@@ -467,15 +467,10 @@ mutual
                     -> Nat
                     -> Core $ ()
     copyConstructors _ [] _ _ _ = pure ()
-    copyConstructors sc ((MkAConAlt n _ mTag args body) :: xs) constrFieldVar retValVar k = do
-        (tag', name') <- getNameTag mTag n
-        emit EmptyFC $ constrFieldVar ++ "[" ++ show k ++ "].tag = " ++ tag' ++ ";"
-        emit EmptyFC $ constrFieldVar ++ "[" ++ show k ++ "].name = " ++ name' ++ ";"
+    copyConstructors sc ((MkAConAlt _ _ tag args body) :: xs) constrFieldVar retValVar k = do
+        emit EmptyFC $ constrFieldVar ++ "[" ++ show k ++ "].tag = " ++ show tag ++ ";"
+        emit EmptyFC $ constrFieldVar ++ "[" ++ show k ++ "].name = " ++ "NULL" ++ ";"
         copyConstructors sc xs constrFieldVar retValVar (S k)
-    where
-        getNameTag : {auto a : Ref ArgCounter Nat} -> Maybe Int -> Name -> Core (String, String)
-        getNameTag Nothing n = pure ("-1", "\"" ++ cName n ++ "\"")
-        getNameTag (Just t) _ = pure (show t, "NULL")
 
 
     conBlocks : {auto a : Ref ArgCounter Nat}
@@ -585,11 +580,6 @@ mutual
         makeNonIntSwitchStatementConst alts (k+1) constantArray compareFct
 
 
-    checkTags : List AConAlt -> Core Bool
-    checkTags [] = pure False
-    checkTags ((MkAConAlt n _ Nothing args sc) :: xs) = pure False
-    checkTags _ = pure True
-
 
     cStatementsFromANF : {auto a : Ref ArgCounter Nat}
                       -> {auto t : Ref TemporaryVariableTracker (List (List String))}
@@ -639,8 +629,8 @@ mutual
         emit fc $ "Value_Constructor* "
                 ++ constr ++ " = newConstructor("
                 ++ (show (length args))
-                ++ ", "  ++ showTag tag  ++ ", "
-                ++ "\"" ++ cName n ++ "\""
+                ++ ", "  ++ show tag ++ ", "
+                ++ "NULL"
                 ++ ");"
         emit fc $ " // constructor " ++ cName n
 

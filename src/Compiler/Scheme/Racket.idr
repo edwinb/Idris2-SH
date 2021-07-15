@@ -173,7 +173,7 @@ rktToC CFChar op = "(char->integer " ++ op ++ ")"
 rktToC _ op = op
 
 handleRet : CFType -> String -> String
-handleRet CFUnit op = op ++ " " ++ mkWorld (schConstructor racketString (UN "") (Just 0) [])
+handleRet CFUnit op = op ++ " " ++ mkWorld (schConstructor 0 [])
 handleRet ret op = mkWorld (cToRkt ret op)
 
 cCall : {auto f : Ref Done (List String) } ->

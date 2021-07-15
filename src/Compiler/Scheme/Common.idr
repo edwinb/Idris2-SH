@@ -43,15 +43,13 @@ schName (WithBlock x y) = "with--" ++ schString x ++ "-" ++ show y
 schName (Resolved i) = "fn--" ++ show i
 
 export
-schConstructor : (String -> String) -> Name -> Maybe Int -> List String -> String
-schConstructor _ _ (Just t) args
+schConstructor : Int -> List String -> String
+schConstructor t args
     = "(vector " ++ show t ++ " " ++ showSep " " args ++ ")"
-schConstructor schString n Nothing args
-    = "(vector " ++ schString (show n) ++ " " ++ showSep " " args ++ ")"
 
 export
-schRecordCon : (String -> String) -> Name -> List String -> String
-schRecordCon _ _ args = "(vector " ++ showSep " " args ++ ")"
+schRecordCon : List String -> String
+schRecordCon args = "(vector " ++ showSep " " args ++ ")"
 
 ||| Generate scheme for a plain function.
 op : String -> List String -> String
@@ -319,14 +317,11 @@ var _ = False
 
 parameters (schExtPrim : Int -> ExtPrim -> List NamedCExp -> Core String,
             schString : String -> String)
-  showTag : Name -> Maybe Int -> String
-  showTag n (Just i) = show i
-  showTag n Nothing = schString (show n)
 
   mutual
     schConAlt : Int -> String -> NamedConAlt -> Core String
     schConAlt i target (MkNConAlt n ci tag args sc)
-        = pure $ "((" ++ showTag n tag ++ ") "
+        = pure $ "((" ++ show tag ++ ") "
                       ++ bindArgs 1 args !(schExp i sc) ++ ")"
       where
         bindArgs : Int -> (ns : List Name) -> String -> String
@@ -558,9 +553,9 @@ parameters (schExtPrim : Int -> ExtPrim -> List NamedCExp -> Core String,
              pure $ "(box " ++ x' ++ ")"
     schExp i (NmCon fc _ JUST tag _) = throw (InternalError "Bad JUST")
     schExp i (NmCon fc x RECORD tag args)
-        = pure $ schRecordCon schString x !(traverse (schExp i) args)
+        = pure $ schRecordCon !(traverse (schExp i) args)
     schExp i (NmCon fc x ci tag args)
-        = pure $ schConstructor schString x tag !(traverse (schExp i) args)
+        = pure $ schConstructor tag !(traverse (schExp i) args)
     schExp i (NmOp fc op args)
         = schOp op !(schArgs i args)
     schExp i (NmExtPrim fc p args)

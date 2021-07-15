@@ -29,7 +29,7 @@ mutual
     AUnderApp : FC -> Name -> (missing : Nat) -> (args : List AVar) -> ANF
     AApp : FC -> (lazy : Maybe LazyReason) -> (closure : AVar) -> (arg : AVar) -> ANF
     ALet : FC -> (var : Int) -> ANF -> ANF -> ANF
-    ACon : FC -> Name -> ConInfo -> (tag : Maybe Int) -> List AVar -> ANF
+    ACon : FC -> Name -> ConInfo -> (tag : Int) -> List AVar -> ANF
     AOp : {0 arity : Nat} -> FC -> (lazy : Maybe LazyReason) -> PrimFn arity -> Vect arity AVar -> ANF
         -- ^ we explicitly bind arity here to silence the warning that it shadows
         --   existing functions called arity.
@@ -42,7 +42,7 @@ mutual
 
   public export
   data AConAlt : Type where
-       MkAConAlt : Name -> ConInfo -> (tag : Maybe Int) -> (args : List Int) ->
+       MkAConAlt : Name -> ConInfo -> (tag : Int) -> (args : List Int) ->
                    ANF -> AConAlt
 
   public export
@@ -52,7 +52,7 @@ mutual
 public export
 data ANFDef : Type where
      MkAFun : (args : List Int) -> ANF -> ANFDef
-     MkACon : (tag : Maybe Int) -> (arity : Nat) -> (nt : Maybe Nat) -> ANFDef
+     MkACon : (tag : Int) -> (arity : Nat) -> (nt : Maybe Nat) -> ANFDef
      MkAForeign : (ccs : List String) -> (fargs : List CFType) ->
                   CFType -> ANFDef
      MkAError : ANF -> ANFDef

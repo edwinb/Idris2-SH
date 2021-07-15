@@ -86,7 +86,7 @@ mutual
     ||| The tag either represents the name of a type constructor
     ||| (when we are pattern matching on types) or the index
     ||| of a data constructor.
-    ECon      : (tag : Either Int Name) -> ConInfo -> List Exp -> Exp
+    ECon      : (tag : Int) -> ConInfo -> List Exp -> Exp
 
     ||| Primitive operation
     EOp       : {0 arity : Nat} -> PrimFn arity -> Vect arity Exp -> Exp
@@ -167,7 +167,7 @@ mutual
   public export
   record EConAlt (e : Effect) where
     constructor MkEConAlt
-    tag     : Either Int Name
+    tag     : Int
     conInfo : ConInfo
     body    : Stmt (Just e)
 

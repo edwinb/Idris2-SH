@@ -133,7 +133,7 @@ HasNamespaces VMInst where
   nsRefs (DECLARE x) = empty
   nsRefs START = empty
   nsRefs (ASSIGN x y) = empty
-  nsRefs (MKCON x tag args) = either (const empty) (singleton . getNS) tag
+  nsRefs (MKCON x tag args) = empty
   nsRefs (MKCLOSURE x n missing args) = singleton $ getNS n
   nsRefs (MKCONSTANT x y) = empty
   nsRefs (APPLY x f a) = empty
@@ -142,8 +142,7 @@ HasNamespaces VMInst where
   nsRefs (EXTPRIM x n xs) = singleton $ getNS n
   nsRefs (CASE x alts def) =
     maybe empty (concatMap nsRefs) def <+>
-    concatMap ((concatMap nsRefs) . snd) alts <+>
-    concatMap ((either (const empty) (singleton . getNS)) . fst) alts
+    concatMap ((concatMap nsRefs) . snd) alts
   nsRefs (CONSTCASE x alts def) =
     maybe empty (concatMap nsRefs) def <+>
     concatMap ((concatMap nsRefs) . snd) alts

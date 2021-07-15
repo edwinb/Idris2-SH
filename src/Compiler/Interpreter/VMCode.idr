@@ -17,7 +17,7 @@ import Data.Vect
 public export
 data Object : Type where
     Closure : (predMissing : Nat) -> (args : SnocList Object) -> Name -> Object
-    Constructor : (tag : Either Int Name) -> (args : List Object) -> Object
+    Constructor : (tag : Int) -> (args : List Object) -> Object
     Const : Constant -> Object
     Null : Object
 
@@ -35,7 +35,7 @@ mutual
 
     showDepth : Nat -> Object -> String
     showDepth (S k) (Closure mis args fn) = show fn ++ "-" ++ show mis ++ "(" ++ showSep k (args <>> []) ++ ")"
-    showDepth (S k) (Constructor (Left t) args) = "tag" ++ show t ++ "(" ++ showSep k args ++ ")"
+    showDepth (S k) (Constructor t args) = "tag" ++ show t ++ "(" ++ showSep k args ++ ")"
     showDepth (S k) (Const c) = show c
     showDepth _ obj = showType obj
 
@@ -129,7 +129,7 @@ unit : Object
 unit = Const (I 0)
 
 ioRes : Object -> Object
-ioRes obj = Constructor (Left 0) [Const WorldVal, obj]
+ioRes obj = Constructor 0 [Const WorldVal, obj]
 
 -- TODO: add more?
 knownForeign : NameMap (ar ** (Ref State InterpState => Stack -> Vect ar Object -> Core Object))
@@ -212,7 +212,7 @@ parameters {auto c : Ref Ctxt Defs}
             Constructor tag _ => matchCon stk tag alts def
             _ => interpError stk $ "CASE: Expected Constructor, found " ++ showType scObj
       where
-        matchCon : Stack -> Either Int Name -> List (Either Int Name, List VMInst) -> Maybe (List VMInst) -> Core ()
+        matchCon : Stack -> Int -> List (Int, List VMInst) -> Maybe (List VMInst) -> Core ()
         matchCon stk tag [] Nothing = interpError stk "CASE: Missing matching alternative or default"
         matchCon stk tag [] (Just is) = traverse_ (step stk) is
         matchCon stk tag ((t, is) :: alts) def =

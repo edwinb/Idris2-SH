@@ -129,12 +129,12 @@ chezString cs = strCons '"' (showChezString (unpack cs) "\"")
 
 mutual
   handleRet : String -> String -> String
-  handleRet "void" op = op ++ " " ++ mkWorld (schConstructor chezString (UN "") (Just 0) [])
+  handleRet "void" op = op ++ " " ++ mkWorld (schConstructor 0 [])
   handleRet _ op = mkWorld op
 
   getFArgs : NamedCExp -> Core (List (NamedCExp, NamedCExp))
-  getFArgs (NmCon fc _ _ (Just 0) _) = pure []
-  getFArgs (NmCon fc _ _ (Just 1) [ty, val, rest]) = pure $ (ty, val) :: !(getFArgs rest)
+  getFArgs (NmCon fc _ _ 0 _) = pure []
+  getFArgs (NmCon fc _ _ 1 [ty, val, rest]) = pure $ (ty, val) :: !(getFArgs rest)
   getFArgs arg = throw (GenericMsg (getFC arg) ("Badly formed c call argument list " ++ show arg))
 
   export
