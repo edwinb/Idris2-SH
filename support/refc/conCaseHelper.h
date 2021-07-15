@@ -2,8 +2,7 @@
 
 #include "cBackend.h"
 
-typedef struct
-{
+typedef struct {
     char *name;
     int tag;
 } AConAlt;

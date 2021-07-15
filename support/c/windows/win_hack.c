@@ -1,3 +1,3 @@
-int chmod(char** str, int perm) {
+int chmod(char **str, int perm) {
     return 0;
 }

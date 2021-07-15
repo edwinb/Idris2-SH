@@ -1,26 +1,26 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct {
     int val;
-    char* str;
+    char *str;
 } Stuff;
 
-Stuff* mkThing() {
+Stuff *mkThing() {
     static int num = 0;
-    Stuff* x = malloc(sizeof(Stuff));
+    Stuff *x = malloc(sizeof(Stuff));
     x->val = num++;
     x->str = malloc(20);
-    strcpy(x->str,"Hello");
+    strcpy(x->str, "Hello");
     return x;
 }
 
-char* getStr(Stuff* x) {
+char *getStr(Stuff *x) {
     return x->str;
 }
 
-void freeThing(Stuff* x) {
+void freeThing(Stuff *x) {
     printf("Freeing %d %s\n", x->val, x->str);
     free(x->str);
     free(x);

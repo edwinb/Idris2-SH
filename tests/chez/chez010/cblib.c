@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-typedef int(*IntFn)(int, int);
-typedef char(*CharFn)(char, int);
+typedef int (*IntFn)(int, int);
+typedef char (*CharFn)(char, int);
 
 int add(int x, int y) {
-    return x+y;
+    return x + y;
 }
 
 int applyIntFn(int x, int y, IntFn f) {

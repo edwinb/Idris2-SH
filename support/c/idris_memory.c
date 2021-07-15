@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void* idris2_malloc(int size) {
+void *idris2_malloc(int size) {
     if (size < 0) {
         fprintf(stderr, "malloc negative argument: %d\n", size);
         abort();
@@ -16,7 +16,7 @@ void* idris2_malloc(int size) {
         return NULL;
     }
 
-    void* ptr = malloc(size);
+    void *ptr = malloc(size);
     if (!ptr) {
         fprintf(stderr, "malloc failed: %s\n", strerror(errno));
         abort();
@@ -24,7 +24,7 @@ void* idris2_malloc(int size) {
     return ptr;
 }
 
-void idris2_free(void* ptr) {
+void idris2_free(void *ptr) {
     if (!ptr) {
         return;
     }
@@ -33,10 +33,10 @@ void idris2_free(void* ptr) {
 
 // TODO: remove `idrnet_malloc` and `idrnet_free` after bootstrap update
 
-void* idrnet_malloc(int size) {
+void *idrnet_malloc(int size) {
     return idris2_malloc(size);
 }
 
-void idrnet_free(void* ptr) {
+void idrnet_free(void *ptr) {
     idris2_free(ptr);
 }

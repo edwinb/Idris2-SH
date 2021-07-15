@@ -29,15 +29,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-ssize_t
-getdelim(char **buf, size_t *bufsiz, int delimiter, FILE *fp)
-{
+ssize_t getdelim(char **buf, size_t *bufsiz, int delimiter, FILE *fp) {
     char *ptr, *eptr;
 
     if (*buf == NULL || *bufsiz == 0) {
@@ -75,8 +73,6 @@ getdelim(char **buf, size_t *bufsiz, int delimiter, FILE *fp)
     }
 }
 
-ssize_t
-getline(char **buf, size_t *bufsiz, FILE *fp)
-{
-  return getdelim(buf, bufsiz, '\n', fp);
+ssize_t getline(char **buf, size_t *bufsiz, FILE *fp) {
+    return getdelim(buf, bufsiz, '\n', fp);
 }

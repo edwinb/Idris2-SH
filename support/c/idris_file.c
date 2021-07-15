@@ -1,12 +1,12 @@
-#include "getline.h"
 #include "idris_file.h"
+#include "getline.h"
 
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <sys/time.h>
 #include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #ifdef _WIN32
@@ -15,7 +15,7 @@
 #include <sys/select.h>
 #endif
 
-FILE* idris2_openFile(char* name, char* mode) {
+FILE *idris2_openFile(char *name, char *mode) {
 #ifdef _WIN32
     FILE *f = win32_u8fopen(name, mode);
 #else
@@ -24,16 +24,16 @@ FILE* idris2_openFile(char* name, char* mode) {
     return (void *)f;
 }
 
-void idris2_closeFile(FILE* f) {
+void idris2_closeFile(FILE *f) {
     fclose(f);
 }
 
-int idris2_fileError(FILE* f) {
+int idris2_fileError(FILE *f) {
     return ferror(f);
 }
 
 int idris2_fileErrno() {
-    switch(errno) {
+    switch (errno) {
     case ENOENT:
         return 2;
     case EACCES:
@@ -49,7 +49,7 @@ int idris2_removeFile(const char *filename) {
     return remove(filename);
 }
 
-int idris2_fileSize(FILE* f) {
+int idris2_fileSize(FILE *f) {
     int fd = fileno(f);
 
     struct stat buf;
@@ -60,8 +60,7 @@ int idris2_fileSize(FILE* f) {
     }
 }
 
-int idris2_fpoll(FILE* f)
-{
+int idris2_fpoll(FILE *f) {
 #ifdef _WIN32
     return win_fpoll(f);
 #else
@@ -74,7 +73,7 @@ int idris2_fpoll(FILE* f)
     FD_ZERO(&x);
     FD_SET(fd, &x);
 
-    int r = select(fd+1, &x, 0, 0, &timeout);
+    int r = select(fd + 1, &x, 0, 0, &timeout);
     return r;
 #endif
 }
@@ -98,8 +97,7 @@ void idris2_pclose(void *stream) {
 
 // seek through the next newline, consuming and
 // throwing away anything until then.
-int idris2_seekLine(FILE *f)
-{
+int idris2_seekLine(FILE *f) {
     while (1) {
         int c = fgetc(f);
         if (c == -1) {
@@ -115,19 +113,20 @@ int idris2_seekLine(FILE *f)
     }
 }
 
-char* idris2_readLine(FILE* f) {
+char *idris2_readLine(FILE *f) {
     char *buffer = NULL;
     size_t n = 0;
     ssize_t len;
     len = getline(&buffer, &n, f);
     if (len < 0 && buffer != NULL) {
-        buffer[0] = '\0'; // Copy Idris 1 behaviour - empty string if nothing read
+        buffer[0] =
+            '\0'; // Copy Idris 1 behaviour - empty string if nothing read
     }
     return buffer; // freed by RTS if not NULL
 }
 
-char* idris2_readChars(int num, FILE* f) {
-    char *buffer = malloc((num+1)*sizeof(char));
+char *idris2_readChars(int num, FILE *f) {
+    char *buffer = malloc((num + 1) * sizeof(char));
     size_t len;
     len = fread(buffer, sizeof(char), (size_t)num, f);
     buffer[len] = '\0';
@@ -139,11 +138,11 @@ char* idris2_readChars(int num, FILE* f) {
     }
 }
 
-size_t idris2_readBufferData(FILE* h, char* buffer, size_t loc, size_t max) {
+size_t idris2_readBufferData(FILE *h, char *buffer, size_t loc, size_t max) {
     return fread(buffer + loc, sizeof(uint8_t), max, h);
 }
 
-int idris2_writeLine(FILE* f, char* str) {
+int idris2_writeLine(FILE *f, char *str) {
     if (fputs(str, f) == EOF) {
         return 0;
     } else {
@@ -151,15 +150,16 @@ int idris2_writeLine(FILE* f, char* str) {
     }
 }
 
-size_t idris2_writeBufferData(FILE* h, const char* buffer, size_t loc, size_t len) {
+size_t idris2_writeBufferData(FILE *h, const char *buffer, size_t loc,
+                              size_t len) {
     return fwrite(buffer + loc, sizeof(uint8_t), len, h);
 }
 
-int idris2_eof(FILE* f) {
+int idris2_eof(FILE *f) {
     return feof(f);
 }
 
-int idris2_fileAccessTime(FILE* f) {
+int idris2_fileAccessTime(FILE *f) {
     int fd = fileno(f);
 
     struct stat buf;
@@ -170,7 +170,7 @@ int idris2_fileAccessTime(FILE* f) {
     }
 }
 
-int idris2_fileModifiedTime(FILE* f) {
+int idris2_fileModifiedTime(FILE *f) {
     int fd = fileno(f);
 
     struct stat buf;
@@ -181,7 +181,7 @@ int idris2_fileModifiedTime(FILE* f) {
     }
 }
 
-int idris2_fileStatusTime(FILE* f) {
+int idris2_fileStatusTime(FILE *f) {
     int fd = fileno(f);
 
     struct stat buf;
@@ -192,14 +192,14 @@ int idris2_fileStatusTime(FILE* f) {
     }
 }
 
-FILE* idris2_stdin() {
+FILE *idris2_stdin() {
     return stdin;
 }
 
-FILE* idris2_stdout() {
+FILE *idris2_stdout() {
     return stdout;
 }
 
-FILE* idris2_stderr() {
+FILE *idris2_stderr() {
     return stderr;
 }

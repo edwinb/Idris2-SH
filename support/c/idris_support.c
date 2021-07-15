@@ -3,10 +3,9 @@
 
 #include <errno.h>
 #include <stdio.h>
-#include <string.h>
-#include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 int _argc;
@@ -17,10 +16,10 @@ extern char **_environ;
 #include "windows/win_utils.h"
 #define environ _environ
 #else
-extern char** environ;
+extern char **environ;
 #endif
 
-int idris2_isNull(void* ptr) {
+int idris2_isNull(void *ptr) {
     return (ptr == NULL);
 }
 
@@ -28,8 +27,8 @@ void *idris2_getNull() {
     return NULL;
 }
 
-char* idris2_getString(void *p) {
-    return (char*)p;
+char *idris2_getString(void *p) {
+    return (char *)p;
 }
 
 int idris2_getErrno() {
@@ -40,15 +39,15 @@ int idris2_getErrno() {
 #endif
 }
 
-char* idris2_strerror(int errnum) {
+char *idris2_strerror(int errnum) {
     return strerror(errnum);
 }
 
-char* idris2_getStr() {
+char *idris2_getStr() {
     char *inp = idris2_readLine(stdin);
     // Remove trailing newline; easier to do this than in PrimIO which
     // doesn't have the relevant functions available yet
-    for(char *c = inp; *c != '\0'; ++c) {
+    for (char *c = inp; *c != '\0'; ++c) {
         if (*c == '\n' || *c == '\r') {
             *c = '\0';
         }
@@ -56,13 +55,13 @@ char* idris2_getStr() {
     return inp;
 }
 
-void idris2_putStr(char* f) {
+void idris2_putStr(char *f) {
     idris2_writeLine(stdout, f);
 }
 
 void idris2_sleep(int sec) {
 #ifdef _WIN32
-    win32_sleep(sec*1000);
+    win32_sleep(sec * 1000);
 #else
     struct timespec t;
     t.tv_sec = sec;
@@ -74,7 +73,7 @@ void idris2_sleep(int sec) {
 
 void idris2_usleep(int usec) {
 #ifdef _WIN32
-    win32_sleep(usec/1000);
+    win32_sleep(usec / 1000);
 #else
     struct timespec t;
     t.tv_sec = usec / 1000000;
@@ -97,11 +96,11 @@ int idris2_getArgCount() {
     return _argc;
 }
 
-char* idris2_getArg(int n) {
+char *idris2_getArg(int n) {
     return _argv[n];
 }
 
-char* idris2_getEnvPair(int i) {
+char *idris2_getEnvPair(int i) {
     return *(environ + i);
 }
 
@@ -137,4 +136,3 @@ long idris2_getNProcessors() {
     return sysconf(_SC_NPROCESSORS_CONF);
 #endif
 }
-

@@ -1,11 +1,11 @@
 #pragma once
 
+#include <gmp.h>
+#include <pthread.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
-#include <stdint.h>
-#include <gmp.h>
 
 #define NO_TAG 0
 #define BITS8_TAG 1
@@ -37,92 +37,77 @@
 #define COMPLETE_CLOSURE_TAG 98 // for trampoline tail recursion handling
 #define WORLD_TAG 99
 
-typedef struct
-{
+typedef struct {
     int refCounter;
     int tag;
 } Value_header;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     char payload[25];
 } Value;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     uint8_t ui8;
 } Value_Bits8;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     uint16_t ui16;
 } Value_Bits16;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     uint32_t ui32;
 } Value_Bits32;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     uint64_t ui64;
 } Value_Bits64;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     int8_t i8;
 } Value_Int8;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     int16_t i16;
 } Value_Int16;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     int32_t i32;
 } Value_Int32;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     int64_t i64;
 } Value_Int64;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     mpz_t i;
 } Value_Integer;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     double d;
 } Value_Double;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     unsigned char c;
 } Value_Char;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     char *str;
 } Value_String;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     int32_t total;
     int32_t tag;
@@ -130,8 +115,7 @@ typedef struct
     Value **args;
 } Value_Constructor;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     int32_t total;
     int32_t filled;
@@ -140,67 +124,57 @@ typedef struct
 
 typedef Value *(*fun_ptr_t)(Value_Arglist *);
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     fun_ptr_t f;
     Value_Arglist *arglist;
 } Value_Closure;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     int32_t index;
 } Value_IORef;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     void *p;
 } Value_Pointer;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     Value_Pointer *p;
     Value_Closure *onCollectFct;
 } Value_GCPointer;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     int capacity;
     Value **arr;
 } Value_Array;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     size_t len;
     char *buffer;
 } Value_Buffer;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     pthread_mutex_t *mutex;
 } Value_Mutex;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     pthread_cond_t *cond;
 } Value_Condition;
 
-typedef struct
-{
+typedef struct {
     Value **refs;
     int filled;
     int total;
 } IORef_Storage;
 
-typedef struct
-{
+typedef struct {
     Value_header header;
     IORef_Storage *listIORefs;
 } Value_World;

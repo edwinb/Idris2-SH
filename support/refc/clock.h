@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include "cBackend.h"
+#include "datatypes.h"
 
 Value *clockTimeMonotonic();
 Value *clockTimeUtc();
