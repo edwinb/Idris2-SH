@@ -1,0 +1,1 @@
+idris2 --no-banner --no-colour --console-width 0 -p contrib concurrency_queue002.idr --exec main

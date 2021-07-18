@@ -162,6 +162,8 @@ Added
 - `Control.Validation`, a library for dependent types input validation.
 - `System.Console.GetOpt`, a library for specifying and parsing command line
   options.
+- `System.Concurrency.Queue` and `System.Concurrency.BufferedChannel`,
+  non-blocking, MT-Safe tools for inter-process communication.
 
 #### New test package
 

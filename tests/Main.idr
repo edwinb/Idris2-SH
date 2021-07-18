@@ -307,6 +307,15 @@ baseLibraryTests = MkTestPool "Base library" [Chez, Node] Nothing
 contribLibraryTests : TestPool
 contribLibraryTests = MkTestPool "Contrib library" [Chez, Node] Nothing
   [ "json_001"
+  -- System.Concurrency.Queue
+  , "concurrency_queue001", "concurrency_queue002", "concurrency_queue003"
+  , "concurrency_queue004", "concurrency_queue005", "concurrency_queue006"
+  -- System.Concurrency.BufferedChannel
+  , "bufferedChannel001", "bufferedChannel002", "bufferedChannel003"
+  , "bufferedChannel004", "bufferedChannel005", "bufferedChannel006"
+  , "bufferedChannel007", "bufferedChannel008", "bufferedChannel009"
+  , "bufferedChannel010", "bufferedChannel011", "bufferedChannel012"
+  , "bufferedChannel013", "bufferedChannel014"
   ]
 
 codegenTests : TestPool

@@ -1,0 +1,1 @@
+idris2 --no-banner --no-colour --console-width 0 -p contrib bufferedChannel005.idr --exec main
