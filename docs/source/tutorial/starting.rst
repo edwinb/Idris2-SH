@@ -90,8 +90,6 @@ which you can run:
     $ ./build/exec/hello
     Hello world
 
-(On macOS you may first need to install realpath: ```brew install coreutils```)
-
 Please note that the dollar sign ``$`` indicates the shell prompt!
 Some useful options to the Idris command are:
 
