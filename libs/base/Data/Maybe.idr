@@ -1,5 +1,7 @@
 module Data.Maybe
 
+import Control.Function
+
 %default total
 
 public export
@@ -48,8 +50,8 @@ toMaybe True  j = Just j
 toMaybe False _ = Nothing
 
 export
-justInjective : Just x = Just y -> x = y
-justInjective Refl = Refl
+Injective Just where
+  injective Refl = Refl
 
 ||| Convert a `Maybe a` value to an `a` value, using `neutral` in the case
 ||| that the `Maybe` value is `Nothing`.

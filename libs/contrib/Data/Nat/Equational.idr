@@ -11,7 +11,7 @@ import Data.Nat
 export
 subtractEqLeft : (a : Nat) -> {b, c : Nat} -> a + b = a + c -> b = c
 subtractEqLeft 0 prf = prf
-subtractEqLeft (S k) prf = subtractEqLeft k $ succInjective (k + b) (k + c) prf
+subtractEqLeft (S k) prf = subtractEqLeft k $ injective prf
 
 ||| Subtract a number from both sides of an equation.
 ||| Due to partial nature of subtraction in natural numbers, an equation of

@@ -1,5 +1,6 @@
 module Decidable.Equality
 
+import Control.Function
 import Data.Maybe
 import Data.Either
 import Data.Nat
@@ -40,7 +41,7 @@ DecEq Nat where
   decEq (S _) Z     = No absurd
   decEq (S n) (S m) with (decEq n m)
    decEq (S n) (S m) | Yes p = Yes $ cong S p
-   decEq (S n) (S m) | No p = No $ \h : (S n = S m) => p $ succInjective n m h
+   decEq (S n) (S m) | No p = No $ \h : (S n = S m) => p $ injective h
 
 --------------------------------------------------------------------------------
 -- Maybe
@@ -54,7 +55,7 @@ DecEq t => DecEq (Maybe t) where
   decEq (Just x') (Just y') with (decEq x' y')
     decEq (Just x') (Just y') | Yes p = Yes $ cong Just p
     decEq (Just x') (Just y') | No p
-       = No $ \h : Just x' = Just y' => p $ justInjective h
+       = No $ \h : Just x' = Just y' => p $ injective h
 
 --------------------------------------------------------------------------------
 -- Either
@@ -64,12 +65,12 @@ public export
 (DecEq t, DecEq s) => DecEq (Either t s) where
   decEq (Left x) (Left y) with (decEq x y)
    decEq (Left x) (Left x) | Yes Refl = Yes Refl
-   decEq (Left x) (Left y) | No contra = No (contra . leftInjective)
+   decEq (Left x) (Left y) | No contra = No (contra . injective)
   decEq (Left x) (Right y) = No absurd
   decEq (Right x) (Left y) = No absurd
   decEq (Right x) (Right y) with (decEq x y)
    decEq (Right x) (Right x) | Yes Refl = Yes Refl
-   decEq (Right x) (Right y) | No contra = No (contra . rightInjective)
+   decEq (Right x) (Right y) | No contra = No (contra . injective)
 
 --------------------------------------------------------------------------------
 -- Tuple

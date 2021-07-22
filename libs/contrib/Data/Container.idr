@@ -301,12 +301,12 @@ namespace Derivative
   fromPair (MkExtension ((shp1, shp2) ** p) chld) = case p of
     Left p1 => toSum {c = Pair (Derivative c) d} {d = Pair c (Derivative d)}
                      (Left (MkExtension ((shp1 ** p1), shp2) $ either
-                         (\ p1' => chld (Left (DPair.fst p1') ** DPair.snd p1' . leftInjective))
+                         (\ p1' => chld (Left (DPair.fst p1') ** DPair.snd p1' . injective))
                          (\ p2 => chld (Right p2 ** absurd))))
     Right p2 => toSum {c = Pair (Derivative c) d} {d = Pair c (Derivative d)}
                      (Right (MkExtension (shp1, (shp2 ** p2)) $ either
                          (\ p1 => chld (Left p1 ** absurd))
-                         (\ p2' => chld (Right (DPair.fst p2') ** DPair.snd p2' . rightInjective))))
+                         (\ p2' => chld (Right (DPair.fst p2') ** DPair.snd p2' . injective))))
 
 
   export

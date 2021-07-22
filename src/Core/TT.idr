@@ -637,6 +637,9 @@ namespace HasLength
   cast : {ys : _} -> List.length xs = List.length ys -> HasLength m xs -> HasLength m ys
   cast {ys = []}      eq Z = Z
   cast {ys = y :: ys} eq (S p) = S (cast (succInjective _ _ eq) p)
+    where
+    succInjective : (0 l, r : Nat) -> S l = S r -> l = r
+    succInjective _ _ Refl = Refl
 
   hlReverseOnto : HasLength m acc -> HasLength n xs -> HasLength (m + n) (reverseOnto acc xs)
   hlReverseOnto p Z = rewrite plusZeroRightNeutral m in p
