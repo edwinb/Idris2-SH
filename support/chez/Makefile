@@ -1,5 +1,7 @@
 include ../../config.mk
 
+IDRIS2_DESTDIR := ${DESTDIR}${PREFIX}
+
 all: build
 
 clean:
@@ -10,8 +12,8 @@ clean:
 build: support-sep.ss
 
 install: build
-	mkdir -p ${PREFIX}/idris2-${IDRIS2_VERSION}/support/chez
-	install *.ss ${PREFIX}/idris2-${IDRIS2_VERSION}/support/chez
+	mkdir -p ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/support/chez
+	install *.ss ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/support/chez
 
 support-sep.ss: support.ss
 	# start library header

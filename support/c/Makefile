@@ -4,6 +4,7 @@ TARGET = libidris2_support
 
 LIBTARGET = $(TARGET).a
 DYLIBTARGET = $(TARGET)$(SHLIB_SUFFIX)
+IDRIS2_DESTDIR := ${DESTDIR}${PREFIX}
 
 SRCS := $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
@@ -53,8 +54,8 @@ cleandep: clean
 .PHONY: install
 
 install: build
-	mkdir -p ${PREFIX}/idris2-${IDRIS2_VERSION}/lib
-	mkdir -p ${PREFIX}/idris2-${IDRIS2_VERSION}/include
-	install -m 755 $(DYLIBTARGET) ${PREFIX}/idris2-${IDRIS2_VERSION}/lib
-	install -m 644 $(LIBTARGET)   ${PREFIX}/idris2-${IDRIS2_VERSION}/lib
-	install -m 644 *.h            ${PREFIX}/idris2-${IDRIS2_VERSION}/include
+	mkdir -p ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/lib
+	mkdir -p ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/include
+	install -m 755 $(DYLIBTARGET) ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/lib
+	install -m 644 $(LIBTARGET)   ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/lib
+	install -m 644 *.h            ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/include

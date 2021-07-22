@@ -3,6 +3,7 @@ include ../../config.mk
 TARGET = libidris2_refc
 
 LIBTARGET = $(TARGET).a
+IDRIS2_DESTDIR := ${DESTDIR}${PREFIX}
 
 SRCS := $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
@@ -43,5 +44,5 @@ cleandep: clean
 .PHONY: install
 
 install: build
-	mkdir -p ${PREFIX}/idris2-${IDRIS2_VERSION}/refc
-	install $(LIBTARGET) *.h ${PREFIX}/idris2-${IDRIS2_VERSION}/refc
+	mkdir -p ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/refc
+	install $(LIBTARGET) *.h ${IDRIS2_DESTDIR}/idris2-${IDRIS2_VERSION}/refc

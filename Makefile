@@ -44,6 +44,8 @@ endif
 
 TEST_PREFIX ?= ${IDRIS2_CURDIR}/build/env
 
+IDRIS2_DESTDIR := ${DESTDIR}${IDRIS2_PREFIX}
+
 # Library and data paths for bootstrap-test
 IDRIS2_BOOT_PREFIX := ${IDRIS2_CURDIR}/bootstrap-build
 
@@ -170,35 +172,35 @@ install-with-src-api: src/IdrisPaths.idr
 	${IDRIS2_BOOT} --install-with-src ${IDRIS2_LIB_IPKG}
 
 install-idris2:
-	mkdir -p ${PREFIX}/bin/
-	install ${TARGET} ${PREFIX}/bin
+	mkdir -p ${IDRIS2_DESTDIR}/bin/
+	install ${TARGET} ${IDRIS2_DESTDIR}/bin
 ifeq ($(OS), windows)
-	-install ${TARGET}.cmd ${PREFIX}/bin
+	-install ${TARGET}.cmd ${IDRIS2_DESTDIR}/bin
 endif
-	mkdir -p ${PREFIX}/lib/
-	install support/c/${IDRIS2_SUPPORT} ${PREFIX}/lib
-	mkdir -p ${PREFIX}/bin/${NAME}_app
-	install ${TARGETDIR}/${NAME}_app/* ${PREFIX}/bin/${NAME}_app
+	mkdir -p ${IDRIS2_DESTDIR}/lib/
+	install support/c/${IDRIS2_SUPPORT} ${IDRIS2_DESTDIR}/lib
+	mkdir -p ${IDRIS2_DESTDIR}/bin/${NAME}_app
+	install ${TARGETDIR}/${NAME}_app/* ${IDRIS2_DESTDIR}/bin/${NAME}_app
 
 install-support:
-	mkdir -p ${PREFIX}/${NAME_VERSION}/support/docs
-	mkdir -p ${PREFIX}/${NAME_VERSION}/support/racket
-	mkdir -p ${PREFIX}/${NAME_VERSION}/support/gambit
-	mkdir -p ${PREFIX}/${NAME_VERSION}/support/js
-	install support/docs/* ${PREFIX}/${NAME_VERSION}/support/docs
-	install support/racket/* ${PREFIX}/${NAME_VERSION}/support/racket
-	install support/gambit/* ${PREFIX}/${NAME_VERSION}/support/gambit
-	install support/js/* ${PREFIX}/${NAME_VERSION}/support/js
+	mkdir -p ${IDRIS2_DESTDIR}/${NAME_VERSION}/support/docs
+	mkdir -p ${IDRIS2_DESTDIR}/${NAME_VERSION}/support/racket
+	mkdir -p ${IDRIS2_DESTDIR}/${NAME_VERSION}/support/gambit
+	mkdir -p ${IDRIS2_DESTDIR}/${NAME_VERSION}/support/js
+	install support/docs/* ${IDRIS2_DESTDIR}/${NAME_VERSION}/support/docs
+	install support/racket/* ${IDRIS2_DESTDIR}/${NAME_VERSION}/support/racket
+	install support/gambit/* ${IDRIS2_DESTDIR}/${NAME_VERSION}/support/gambit
+	install support/js/* ${IDRIS2_DESTDIR}/${NAME_VERSION}/support/js
 	@${MAKE} -C support/c install
 	@${MAKE} -C support/refc install
 	@${MAKE} -C support/chez install
 
 install-libs:
-	${MAKE} -C libs/prelude install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH}
-	${MAKE} -C libs/base install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH}
-	${MAKE} -C libs/contrib install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH}
-	${MAKE} -C libs/network install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH}
-	${MAKE} -C libs/test  install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH}
+	${MAKE} -C libs/prelude install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH} IDRIS2_PREFIX=${IDRIS2_DESTDIR}
+	${MAKE} -C libs/base install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH} IDRIS2_PREFIX=${IDRIS2_DESTDIR}
+	${MAKE} -C libs/contrib install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH} IDRIS2_PREFIX=${IDRIS2_DESTDIR}
+	${MAKE} -C libs/network install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH} IDRIS2_PREFIX=${IDRIS2_DESTDIR}
+	${MAKE} -C libs/test  install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH} IDRIS2_PREFIX=${IDRIS2_DESTDIR}
 
 install-with-src-libs:
 	${MAKE} -C libs/prelude install-with-src IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH}
