@@ -260,6 +260,14 @@ export %inline
 mustWork : {c : Bool} -> Grammar state tok c ty -> Grammar state tok c ty
 mustWork = MustWork
 
+||| If the parser fails, treat it as a fatal error and explain why
+export
+mustWorkBecause :
+  {c : Bool} -> Bounds -> String ->
+  Grammar state tok c ty -> Grammar state tok c ty
+mustWorkBecause {c} loc msg p
+  = rewrite sym (andSameNeutral c) in
+    p <|> fatalLoc loc msg
 export %inline
 bounds : Grammar state tok c ty -> Grammar state tok c (WithBounds ty)
 bounds = Bounds

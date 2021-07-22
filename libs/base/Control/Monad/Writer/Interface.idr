@@ -60,47 +60,47 @@ public export %inline
 (Monoid w, Monad m) => MonadWriter w (WriterT w m) where
   writer   = writerT . pure
 
-  listen m = MkWriterT \w =>
+  listen m = MkWriterT $ \w =>
                (\(a,w') => ((a,w'),w <+> w')) <$> runWriterT m
 
   tell w'  = writer ((), w')
 
-  pass m   = MkWriterT \w =>
+  pass m   = MkWriterT $ \w =>
                (\((a,f),w') => (a,w <+> f w')) <$> runWriterT m
 
 public export %inline
 (Monoid w, Monad m) => MonadWriter w (RWST r w s m) where
-  writer (a,w') = MkRWST \_,s,w => pure (a,s,w <+> w')
+  writer (a,w') = MkRWST $ \_,s,w => pure (a,s,w <+> w')
 
   tell w' = writer ((), w')
 
-  listen m = MkRWST \r,s,w =>
+  listen m = MkRWST $ \r,s,w =>
                (\(a,s',w') => ((a,w'),s',w <+> w')) <$> runRWST m r s
 
-  pass m = MkRWST \r,s,w =>
+  pass m = MkRWST $ \r,s,w =>
              (\((a,f),s',w') => (a,s',w <+> f w')) <$> runRWST m r s
 
 public export %inline
 MonadWriter w m => MonadWriter w (EitherT e m) where
   writer = lift . writer
   tell   = lift . tell
-  listen = mapEitherT \m => do (e,w) <- listen m
-                               pure $ map (\a => (a,w)) e
+  listen = mapEitherT $ \m => do (e,w) <- listen m
+                                 pure $ map (\a => (a,w)) e
 
-  pass   = mapEitherT \m => pass $ do Right (r,f) <- m
-                                        | Left l => pure $ (Left l, id)
-                                      pure (Right r, f)
+  pass   = mapEitherT $ \m => pass $ do Right (r,f) <- m
+                                          | Left l => pure $ (Left l, id)
+                                        pure (Right r, f)
 
 public export %inline
 MonadWriter w m => MonadWriter w (MaybeT m) where
   writer = lift . writer
   tell   = lift . tell
-  listen = mapMaybeT \m => do (e,w) <- listen m
-                              pure $ map (\a => (a,w)) e
+  listen = mapMaybeT $ \m => do (e,w) <- listen m
+                                pure $ map (\a => (a,w)) e
 
-  pass   = mapMaybeT \m => pass $ do Just (r,f) <- m
-                                       | Nothing => pure $ (Nothing, id)
-                                     pure (Just r, f)
+  pass   = mapMaybeT $ \m => pass $ do Just (r,f) <- m
+                                         | Nothing => pure $ (Nothing, id)
+                                       pure (Just r, f)
 public export %inline
 MonadWriter w m => MonadWriter w (ReaderT r m) where
   writer = lift . writer
@@ -112,8 +112,8 @@ public export %inline
 MonadWriter w m => MonadWriter w (StateT s m) where
   writer = lift . writer
   tell   = lift . tell
-  listen (ST m) = ST \s => do ((s',a),w) <- listen (m s)
-                              pure (s',(a,w))
+  listen (ST m) = ST $ \s => do ((s',a),w) <- listen (m s)
+                                pure (s',(a,w))
 
-  pass   (ST m) = ST \s => pass $ do (s',(a,f)) <- m s
-                                     pure ((s',a),f)
+  pass   (ST m) = ST $ \s => pass $ do (s',(a,f)) <- m s
+                                       pure ((s',a),f)

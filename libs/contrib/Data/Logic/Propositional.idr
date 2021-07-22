@@ -13,7 +13,7 @@ PEM p = Either p (Not p)
 
 ||| Double negation elimination
 DNE : Type -> Type
-DNE p = Not $ Not p -> p
+DNE p = Not (Not p) -> p
 
 ||| The consensus theorem (at least, the interesting part)
 Consensus : Type -> Type -> Type -> Type
@@ -96,7 +96,7 @@ switchPEM (Right r) f = f r
 EDN : DN p -> DNE p -> p
 EDN f g = g f
 
-pemDNE : DNE $ PEM p -> PEM p
+pemDNE : DNE (PEM p) -> PEM p
 pemDNE = EDN pemDN
 
 -- It's possible to prove the theorems assuming Peirce's law, but some

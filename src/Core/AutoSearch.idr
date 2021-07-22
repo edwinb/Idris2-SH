@@ -137,7 +137,7 @@ anyOne : {vars : _} ->
          Core (Term vars)
 anyOne fc env top [] = throw (CantSolveGoal fc [] top)
 anyOne fc env top [elab]
-    = catch elab
+    = catch elab $
          \case
            err@(CantSolveGoal _ _ _) => throw err
            _ => throw $ CantSolveGoal fc [] top
@@ -151,7 +151,7 @@ exactlyOne : {vars : _} ->
              List (Core (Term vars)) ->
              Core (Term vars)
 exactlyOne fc env top target [elab]
-    = catch elab
+    = catch elab $
          \case
            err@(CantSolveGoal _ _ _) => throw err
            _ => throw $ CantSolveGoal fc [] top

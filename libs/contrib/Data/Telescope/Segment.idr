@@ -136,9 +136,10 @@ projection : {0 gamma : Left.Telescope k}
           -> Environment (gamma |++ delta)
           -> Environment gamma
 projection {n = 0  } {delta = []         } env = env
-projection {n = S n} {delta = ty :: delta} env = let (env' ** _) = projection {n} {delta}
-                                                                   rewrite succLemma n k in env
-                                                 in env'
+projection {n = S n} {delta = ty :: delta} env
+  = let (env' ** _) = projection {n} {delta}
+                    $ rewrite succLemma n k in env
+    in env'
 
 infixl 4 .=
 

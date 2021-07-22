@@ -195,7 +195,7 @@ mutual
                                  !(desugarB side ps' retTy)
   desugarB side ps (PLam fc rig p pat@(PRef prefFC n@(UN nm)) argTy scope)
       =  if lowerFirst nm || nm == "_"
-           then do whenJust (isConcreteFC prefFC) \nfc
+           then do whenJust (isConcreteFC prefFC) $ \nfc
                      => addSemanticDecorations [(nfc, Bound, Just n)]
                    pure $ ILam fc rig !(traverse (desugar AnyExpr ps) p)
                            (Just n) !(desugarB AnyExpr ps argTy)
@@ -218,7 +218,7 @@ mutual
                  ICase fc (IVar EmptyFC (MN "lamc" 0)) (Implicit fc False)
                      [snd !(desugarClause ps True (MkPatClause fc pat scope []))]
   desugarB side ps (PLet fc rig (PRef prefFC n) nTy nVal scope [])
-      = do whenJust (isConcreteFC prefFC) \nfc =>
+      = do whenJust (isConcreteFC prefFC) $ \nfc =>
              addSemanticDecorations [(nfc, Bound, Just n)]
            pure $ ILet fc prefFC rig n !(desugarB side ps nTy) !(desugarB side ps nVal)
                                        !(desugar side (n :: ps) scope)
@@ -366,7 +366,7 @@ mutual
       = do r' <- desugarB side ps r
            let pval = apply (IVar opFC mkdpairname) [IVar nameFC n, r']
            let vfc = virtualiseFC nameFC
-           whenJust (isConcreteFC nameFC) \nfc =>
+           whenJust (isConcreteFC nameFC) $ \nfc =>
              addSemanticDefault (nfc, Bound, Just n)
            pure $ IAlternative fc (UniqueDefault pval)
                   [apply (IVar opFC dpairname)
@@ -568,7 +568,7 @@ mutual
   expandDo side ps topfc ns (DoBind fc nameFC n tm :: rest)
       = do tm' <- desugarDo side ps ns tm
            rest' <- expandDo side ps topfc ns rest
-           whenJust (isConcreteFC nameFC) \nfc => addSemanticDecorations [(nfc, Bound, Just n)]
+           whenJust (isConcreteFC nameFC) $ \nfc => addSemanticDecorations [(nfc, Bound, Just n)]
            pure $ bindFun fc ns tm'
                 $ ILam nameFC top Explicit (Just n)
                        (Implicit (virtualiseFC fc) False) rest'
@@ -593,7 +593,7 @@ mutual
            tm' <- desugarB side ps tm
            ty' <- desugarDo side ps ns ty
            rest' <- expandDo side ps topfc ns rest
-           whenJust (isConcreteFC lhsFC) \nfc => addSemanticDecorations [(nfc, Bound, Just n)]
+           whenJust (isConcreteFC lhsFC) $ \nfc => addSemanticDecorations [(nfc, Bound, Just n)]
            let bind = ILet fc (virtualiseFC lhsFC) rig n ty' tm' rest'
            bd <- get Bang
            pure $ bindBangs (bangNames bd) ns bind

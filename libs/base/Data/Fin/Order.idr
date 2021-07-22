@@ -45,8 +45,8 @@ using (k : Nat)
     connex {y = FZ} _ = Right $ FromNatPrf LTEZero
     connex {x = FS k} {y = FS j} prf =
       case connex {rel = FinLTE} $ prf . (cong FS) of
-        Left  $ FromNatPrf p => Left  $ FromNatPrf $ LTESucc p
-        Right $ FromNatPrf p => Right $ FromNatPrf $ LTESucc p
+        Left  (FromNatPrf p) => Left  $ FromNatPrf $ LTESucc p
+        Right (FromNatPrf p) => Right $ FromNatPrf $ LTESucc p
 
   public export
   Decidable 2 [Fin k, Fin k] FinLTE where

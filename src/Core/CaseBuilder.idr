@@ -892,7 +892,7 @@ getScore : {ns : _} ->
 getScore fc phase name npss
     = do catch (do sameType fc phase name (mkEnv fc ns) npss
                    pure (Right ()))
-               \case
+               $ \case
                  CaseCompile _ _ err => pure $ Left err
                  err => throw err
 

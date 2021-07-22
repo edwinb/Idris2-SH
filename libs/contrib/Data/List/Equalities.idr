@@ -96,8 +96,9 @@ appendSameRightInjective xs ys (z::zs) = rewrite appendAssociative xs [z] zs in
 export
 appendNonEmptyLeftNotEq : (zs, xs : List a) -> NonEmpty xs => Not (zs = xs ++ zs)
 appendNonEmptyLeftNotEq []      (_::_)  Refl impossible
-appendNonEmptyLeftNotEq (z::zs) (_::xs) prf = appendNonEmptyLeftNotEq zs (xs ++ [z]) @{SnocNonEmpty xs z}
-                                                rewrite sym $ appendAssociative xs [z] zs in snd $ consInjective prf
+appendNonEmptyLeftNotEq (z::zs) (_::xs) prf
+  = appendNonEmptyLeftNotEq zs (xs ++ [z]) @{SnocNonEmpty xs z}
+  $ rewrite sym $ appendAssociative xs [z] zs in snd $ consInjective prf
 
 ||| List cannot be equal to itself appended with some non-empty list.
 export

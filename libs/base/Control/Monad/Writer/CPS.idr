@@ -44,7 +44,7 @@ execWriterT = map snd . runWriterT
 public export %inline
 mapWriterT :  (Functor n, Monoid w, Semigroup w')
            => (m (a, w) -> n (b, w')) -> WriterT w m a -> WriterT w' n b
-mapWriterT f m = MkWriterT \w =>
+mapWriterT f m = MkWriterT $ \w =>
                   (\(a,w') => (a,w <+> w')) <$> f (runWriterT m)
 
 --------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ execWriter = runIdentity . execWriterT
 public export %inline
 mapWriter :  (Monoid w, Semigroup w')
           => ((a, w) -> (b, w')) -> Writer w a -> Writer w' b
-mapWriter f = mapWriterT \(Id p) => Id (f p)
+mapWriter f = mapWriterT $ \(Id p) => Id (f p)
 
 --------------------------------------------------------------------------------
 --          Implementations
@@ -80,29 +80,29 @@ mapWriter f = mapWriterT \(Id p) => Id (f p)
 
 public export %inline
 Functor m => Functor (WriterT w m) where
-  map f m = MkWriterT \w => (\(a,w') => (f a,w')) <$> unWriterT m w
+  map f m = MkWriterT $ \w => (\(a,w') => (f a,w')) <$> unWriterT m w
 
 public export %inline
 Monad m => Applicative (WriterT w m) where
-  pure a = MkWriterT \w => pure (a,w)
+  pure a = MkWriterT $ \w => pure (a,w)
   MkWriterT mf <*> MkWriterT mx =
-    MkWriterT \w => do (f,w1) <- mf w
-                       (a,w2) <- mx w1
-                       pure (f a,w2)
+    MkWriterT $ \w => do (f,w1) <- mf w
+                         (a,w2) <- mx w1
+                         pure (f a,w2)
 
 public export %inline
 (Monad m, Alternative m) => Alternative (WriterT w m) where
-  empty = MkWriterT \_ => empty
-  MkWriterT m <|> MkWriterT n = MkWriterT \w => m w <|> n w
+  empty = MkWriterT $ \_ => empty
+  MkWriterT m <|> MkWriterT n = MkWriterT $ \w => m w <|> n w
 
 public export %inline
 Monad m => Monad (WriterT w m) where
-  m >>= k = MkWriterT \w => do (a,w1) <- unWriterT m w
-                               unWriterT (k a) w1
+  m >>= k = MkWriterT $ \w => do (a,w1) <- unWriterT m w
+                                 unWriterT (k a) w1
 
 public export %inline
 MonadTrans (WriterT w) where
-  lift m = MkWriterT \w => map (\a => (a,w)) m
+  lift m = MkWriterT $ \w => map (\a => (a,w)) m
 
 public export %inline
 HasIO m => HasIO (WriterT w m) where

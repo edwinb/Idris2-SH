@@ -50,7 +50,7 @@ smallerPlusL m k = rewrite sym (plusSuccRightSucc m k) in LTESucc $ LTESucc $ lt
 
 smallerPlusR : (m : Nat) -> (k : Nat) -> LTE (S (S k)) (S (m + S k))
 smallerPlusR m k = rewrite sym (plusSuccRightSucc m k) in
-                    LTESucc $ LTESucc rewrite plusCommutative m k in lteAddRight _
+                    LTESucc $ LTESucc $ rewrite plusCommutative m k in lteAddRight _
 
 ||| Covering function for the `SplitRec` view
 ||| Constructs the view in O(n lg n)

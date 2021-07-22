@@ -593,7 +593,7 @@ tryInstantiate {newvars} loc mode env mname mref num mdef locs otm tm
             pure $ (Bind bfc x (Lam fc c Explicit (Erased bfc False)) <$> sc')
     mkDef vs vars soln (Bind bfc x b@(Let _ c val ty) sc)
        = do mbsc' <- mkDef vs (ICons Nothing vars) soln sc
-            flip traverseOpt mbsc' \sc' =>
+            flip traverseOpt mbsc' $ \sc' =>
               case shrinkTerm sc' (DropCons SubRefl) of
                 Just scs => pure scs
                 Nothing => pure $ Bind bfc x b sc'
@@ -1449,7 +1449,7 @@ retryGuess mode smode (hid, (loc, hname))
                          ignore $ addDef (Resolved hid) gdef
                          removeGuess hid
                          pure True)
-                     \case
+                     $ \case
                        DeterminingArg _ n i _ _ =>
                          do logTerm "unify.retry" 5
                                     ("Failed (det " ++ show hname ++ " " ++ show n ++ ")")

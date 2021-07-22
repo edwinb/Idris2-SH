@@ -108,7 +108,7 @@ fmtOpt (MkOpt sos los ad descr) =
 ||| the header (first argument) and the options described by the
 ||| second argument.
 public export
-usageInfo : (header : String) -> List $ OptDescr a -> String
+usageInfo : (header : String) -> List (OptDescr a) -> String
 usageInfo header optDescr =
   let (ss,ls,ds)   = (unzip3 . concatMap fmtOpt) optDescr
       paste        = \x,y,z => "  " ++ x ++ "  " ++ y ++ "  " ++ z
@@ -126,7 +126,7 @@ usageInfo header optDescr =
 --          Error Formatting
 --------------------------------------------------------------------------------
 
-errAmbig : List $ OptDescr a -> (optStr : String) -> OptKind a
+errAmbig : List (OptDescr a) -> (optStr : String) -> OptKind a
 errAmbig ods s = let h = "option `" ++ s ++ "' is ambiguous; could be one of:"
                   in OptErr (usageInfo h ods)
 
@@ -167,7 +167,7 @@ Functor Result where
   map f = record { options $= map f }
 
 OptFun : Type -> Type
-OptFun a = List String -> List $ OptDescr a -> (OptKind a,List String)
+OptFun a = List String -> List (OptDescr a) -> (OptKind a,List String)
 
 longOpt : String -> OptFun a
 longOpt ls rs descs =
@@ -231,7 +231,7 @@ getNext a              r _        = (NonOpt $ pack a,r)
 |||   `System.getArgs`).
 export
 getOpt :  ArgOrder a                         -- non-option handling
-       -> List $ OptDescr a                  -- option descriptors
+       -> List (OptDescr a)                  -- option descriptors
        -> (args : List String)               -- the command-line arguments
        -> Result a
 getOpt _        _        []         =  emptyRes

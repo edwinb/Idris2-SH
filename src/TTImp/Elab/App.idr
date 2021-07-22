@@ -59,7 +59,7 @@ getNameType rigc env fc x
                      $ "getNameType is trying to add Bound: "
                       ++ show x ++ " (" ++ show fc ++ ")"
                  when (isSourceName x) $
-                   whenJust (isConcreteFC fc) \nfc => do
+                   whenJust (isConcreteFC fc) $ \nfc => do
                      log "ide-mode.highlight" 7 $ "getNameType is adding Bound: " ++ show x
                      addSemanticDecorations [(nfc, Bound, Just x)]
 
@@ -82,7 +82,7 @@ getNameType rigc env fc x
                       ++ show def.fullname ++ " (" ++ show fc ++ ")"
 
                  when (isSourceName def.fullname) $
-                   whenJust (isConcreteFC fc) \nfc => do
+                   whenJust (isConcreteFC fc) $ \nfc => do
                      let decor = nameTypeDecoration nt
                      log "ide-mode.highlight" 7
                        $ "getNameType is adding " ++ show decor ++ ": " ++ show def.fullname
@@ -131,7 +131,7 @@ getVarType rigc nest env fc x
                                 addNameType fc x env tyenv
 
                                 when (isSourceName ndef.fullname) $
-                                  whenJust (isConcreteFC fc) \nfc => do
+                                  whenJust (isConcreteFC fc) $ \nfc => do
                                     let decor = nameTypeDecoration nt
                                     log "ide-mode.highlight" 7
                                        $ "getNameType is adding "++ show decor ++": "

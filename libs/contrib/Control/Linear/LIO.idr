@@ -91,7 +91,7 @@ run prog = runK prog pure
 
 export
 Functor io => Functor (L io) where
-  map fn act = Bind act \a' => PureW (fn a')
+  map fn act = Bind act $ \a' => PureW (fn a')
 
 export
 Applicative io => Applicative (L io) where

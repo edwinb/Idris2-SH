@@ -418,7 +418,7 @@ checkBindVar rig elabinfo nest env fc str topexp
          notePatVar n
          est <- get EST
 
-         whenJust (isConcreteFC fc) \nfc => do
+         whenJust (isConcreteFC fc) $ \nfc => do
            log "ide-mode.highlight" 7 $ "getNameType is adding Bound: " ++ show n
            addSemanticDecorations [(nfc, Bound, Just n)]
 

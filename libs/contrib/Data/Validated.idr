@@ -111,10 +111,10 @@ public export
   decEq (Invalid x) (Valid y) = No uninhabited
   decEq (Valid x) (Valid y) with (decEq x y)
     decEq (Valid _) (Valid _) | Yes p = rewrite p in Yes Refl
-    decEq (Valid _) (Valid _) | No up = No \case Refl => up Refl
+    decEq (Valid _) (Valid _) | No up = No $ \case Refl => up Refl
   decEq (Invalid x) (Invalid y) with (decEq x y)
     decEq (Invalid _) (Invalid _) | Yes p = rewrite p in Yes Refl
-    decEq (Invalid _) (Invalid _) | No up = No \case Refl => up Refl
+    decEq (Invalid _) (Invalid _) | No up = No $ \case Refl => up Refl
 
 --- Convenience representations ---
 

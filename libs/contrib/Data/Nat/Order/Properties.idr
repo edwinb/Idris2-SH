@@ -21,7 +21,7 @@ LTESuccInjectiveMonotone m n (RFalse not_m_lte_n) = RFalse $ \case
 export
 lteReflection : (a, b : Nat) -> Reflects (a `LTE` b) (a `lte` b)
 lteReflection 0 b = RTrue LTEZero
-lteReflection (S k) 0 = RFalse \sk_lte_z => absurd sk_lte_z
+lteReflection (S k) 0 = RFalse $ \sk_lte_z => absurd sk_lte_z
 lteReflection (S a) (S b) = LTESuccInjectiveMonotone a b (lteReflection a b)
 
 export
@@ -48,7 +48,7 @@ notltIsNotLT a = notlteIsNotLTE (S a)
 
 export
 notlteIsLT : (a, b : Nat) -> a `lte` b = False -> b `LT` a
-notlteIsLT a b prf = notLTImpliesGTE
+notlteIsLT a b prf = notLTImpliesGTE $
                        \prf' =>
                          (invert $ replace {p = Reflects (S a `LTE` S b)} prf
                                  $ lteReflection (S a) (S b)) prf'

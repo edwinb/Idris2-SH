@@ -151,7 +151,7 @@ getNatBuiltin n = do
 ||| Get the name and arity (of non-erased arguments only) of a list of names.
 ||| `cons` should all be data constructors (`DCon`) otherwise it will throw an error.
 getConsGDef : Context -> FC -> (cons : List Name) -> Core $ List (Name, GlobalDef)
-getConsGDef c fc = traverse \n => do
+getConsGDef c fc = traverse $ \n => do
     [(n', _, gdef)] <- lookupCtxtName n c
         | [] => throw $ UndefinedName fc n
         | ns => throw $ AmbiguousName fc $ (\(n, _, _) => n) <$> ns

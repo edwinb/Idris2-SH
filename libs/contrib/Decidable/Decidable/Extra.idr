@@ -63,7 +63,7 @@ decideTransform :
   -> (posDec : IsDecidable n ts r)
   -> IsDecidable n ts (chain {ts} t r)
 decideTransform tDec posDec =
-  curryAll \xs =>
+  curryAll $ \xs =>
     replace {p = id} (chainUncurry (chain t r) Dec xs) $
       replace {p = Dec} (chainUncurry r t xs) $
         tDec $ replace {p = id} (sym $ chainUncurry r Dec xs) $
@@ -85,8 +85,8 @@ notExistsNotForall :
   -> Dec ((x : a) -> p x)
 notExistsNotForall dec decEx =
   case decEx of
-    Yes (x ** nx) => No \f => nx $ f x
-    No notNot => Yes \x => case (dec x) of
+    Yes (x ** nx) => No $ \f => nx $ f x
+    No notNot => Yes $ \x => case (dec x) of
       Yes px => px
       No nx => void $ notNot $ (x ** nx)
 

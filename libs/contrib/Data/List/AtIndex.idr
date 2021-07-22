@@ -47,7 +47,7 @@ find x (y :: xs) with (decEq x y)
   find x (x :: xs) | Yes Refl = Yes (Element Z Z)
   find x (y :: xs) | No neqxy = case find x xs of
       Yes (Element n prf) => Yes (Element (S n) (S prf))
-      No notInxs => No \case
+      No notInxs => No $ \case
         (Element Z p) => void (neqxy (inverseZ p))
         (Element (S n) prf) => absurd (notInxs (Element n (inverseS prf)))
 

@@ -1,0 +1,28 @@
+1/1: Building NamedReturn1 (NamedReturn1.idr)
+Error: Cannot return a named argument.
+
+NamedReturn1:1:24--1:37
+ 1 | not : (arg1 : Bool) -> (arg2 : Bool)
+                            ^^^^^^^^^^^^^
+
+1/1: Building NamedReturn2 (NamedReturn2.idr)
+Error: Cannot return an implicit argument.
+
+NamedReturn2:1:24--1:37
+ 1 | not : (arg1 : Bool) -> {arg2 : Bool}
+                            ^^^^^^^^^^^^^
+
+1/1: Building NamedReturn3 (NamedReturn3.idr)
+Error: Cannot return an auto implicit argument.
+
+NamedReturn3:1:24--1:42
+ 1 | not : (arg1 : Bool) -> {auto arg2 : Bool}
+                            ^^^^^^^^^^^^^^^^^^
+
+1/1: Building NamedReturn4 (NamedReturn4.idr)
+Error: Cannot return a default implicit argument.
+
+NamedReturn4:1:24--1:50
+ 1 | not : (arg1 : Bool) -> {default arg2 True : Bool}
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+

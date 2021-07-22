@@ -15,7 +15,7 @@ import Syntax.PreorderReasoning
 ||| `map` functoriality: identity preservation
 export
 mapId : (xs : Vect n a) -> map Prelude.id xs = xs
-mapId xs = vectorExtensionality _ _ \i => indexNaturality _ _ _
+mapId xs = vectorExtensionality _ _ $ \i => indexNaturality _ _ _
 
 ||| `mapWtihPos f` represents post-composition the tabulated function `f`
 export
@@ -29,7 +29,7 @@ export
 mapTabulate : (f : a -> b) -> (g : Fin n -> a)
   -> tabulate (f . g) = map f (tabulate g)
 mapTabulate f g = irrelevantEq $
-  vectorExtensionality _ _ \i => Calc $
+  vectorExtensionality _ _ $ \i => Calc $
   |~ index i (tabulate (f . g))
   ~~ f (g i)                      ...(indexTabulate _ _)
   ~~ f (index i $ tabulate g)     ...(cong f (sym $ indexTabulate _ _))
@@ -39,7 +39,7 @@ mapTabulate f g = irrelevantEq $
 export
 tabulateConstantly : (x : a) -> Fin.tabulate {len} (const x) === replicate len  x
 tabulateConstantly x = irrelevantEq $
-  vectorExtensionality _ _ \i => Calc $
+  vectorExtensionality _ _ $ \i => Calc $
   |~ index i (Fin.tabulate (const x))
   ~~ x ...(indexTabulate _ _)
   ~~ index i (replicate _ x) ...(sym $ indexReplicate _ _)
@@ -49,7 +49,7 @@ export
 mapRestrictedExtensional : (f, g : a -> b) -> (xs : Vect n a)
   -> (prf : (i : Fin n) -> f (index i xs) = g (index i xs))
   -> map f xs = map g xs
-mapRestrictedExtensional f g xs prf = vectorExtensionality _ _ \i => Calc $
+mapRestrictedExtensional f g xs prf = vectorExtensionality _ _ $ \i => Calc $
   |~ index i (map f xs)
   ~~ f (index i xs)     ...(      indexNaturality _ _ _)
   ~~ g (index i xs)     ...(prf _)
@@ -76,4 +76,6 @@ mapWithElemExtensional : (xs : Vect n a) -> (f, g :  (x : a) -> (0 _ : x `Elem` 
   -> ((x : a) -> (0 pos : x `Elem` xs) -> f x pos = g x pos)
   -> mapWithElem xs f = mapWithElem xs g
 mapWithElemExtensional    []     f g prf = Refl
-mapWithElemExtensional (x :: xs) f g prf = cong2 (::) (prf x Here) (mapWithElemExtensional xs _ _ (\x,pos => prf x (There pos)))
+mapWithElemExtensional (x :: xs) f g prf
+  = cong2 (::) (prf x Here)
+               (mapWithElemExtensional xs _ _ (\x,pos => prf x (There pos)))

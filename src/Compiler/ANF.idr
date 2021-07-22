@@ -187,7 +187,7 @@ mutual
   anf vs (LUnderApp fc n m args)
       = anfArgs fc vs args (AUnderApp fc n m)
   anf vs (LApp fc lazy f a)
-      = anfArgs fc vs [f, a]
+      = anfArgs fc vs [f, a] $
                 \case
                   [fvar, avar] => AApp fc lazy fvar avar
                   _ => ACrash fc "Can't happen (AApp)"

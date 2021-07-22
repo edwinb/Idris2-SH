@@ -1,0 +1,6 @@
+rm -rf build
+
+$1 --no-color --console-width 0 --check NamedReturn1.idr || true
+$1 --no-color --console-width 0 --check NamedReturn2.idr || true
+$1 --no-color --console-width 0 --check NamedReturn3.idr || true
+$1 --no-color --console-width 0 --check NamedReturn4.idr || true

@@ -19,56 +19,56 @@ EmptyRule = Grammar () Token False
 
 export
 equals : Rule ()
-equals = terminal "Expected equals"
+equals = terminal "Expected equals" $
                   \case
                     Equals => Just ()
                     _ => Nothing
 
 export
 lte : Rule ()
-lte = terminal "Expected <="
+lte = terminal "Expected <=" $
                \case
                  LTE => Just ()
                  _ => Nothing
 
 export
 gte : Rule ()
-gte = terminal "Expected >="
+gte = terminal "Expected >=" $
                \case
                  GTE => Just ()
                  _ => Nothing
 
 export
 lt : Rule ()
-lt = terminal "Expected <="
+lt = terminal "Expected <=" $
               \case
                 LT => Just ()
                 _ => Nothing
 
 export
 gt : Rule ()
-gt = terminal "Expected >="
+gt = terminal "Expected >=" $
               \case
                 GT => Just ()
                 _ => Nothing
 
 export
 eqop : Rule ()
-eqop = terminal "Expected =="
+eqop = terminal "Expected ==" $
                 \case
                   EqOp => Just ()
                   _ => Nothing
 
 export
 andop : Rule ()
-andop = terminal "Expected &&"
+andop = terminal "Expected &&" $
                  \case
                    AndOp => Just ()
                    _ => Nothing
 
 export
 eoi : Rule ()
-eoi = terminal "Expected end of input"
+eoi = terminal "Expected end of input" $
                \case
                  EndOfInput => Just ()
                  _ => Nothing
@@ -83,28 +83,28 @@ exactProperty p = terminal ("Expected property " ++ p) $
 
 export
 stringLit : Rule String
-stringLit = terminal "Expected string"
+stringLit = terminal "Expected string" $
                      \case
                        StringLit str => Just str
                        _ => Nothing
 
 export
 integerLit : Rule Integer
-integerLit = terminal "Expected integer"
+integerLit = terminal "Expected integer" $
                       \case
                         IntegerLit i => Just i
                         _ => Nothing
 
 export
 namespacedIdent : Rule (Maybe Namespace, String)
-namespacedIdent = terminal "Expected namespaced identifier"
+namespacedIdent = terminal "Expected namespaced identifier" $
                            \case
                              DotSepIdent ns n => Just (ns, n)
                              _ => Nothing
 
 export
 moduleIdent : Rule ModuleIdent
-moduleIdent = terminal "Expected module identifier"
+moduleIdent = terminal "Expected module identifier" $
                        \case
                          DotSepIdent ns m =>
                            Just $ nsAsModuleIdent $
@@ -113,7 +113,7 @@ moduleIdent = terminal "Expected module identifier"
 
 export
 packageName : Rule String
-packageName = terminal "Expected package name"
+packageName = terminal "Expected package name" $
                        \case
                          DotSepIdent Nothing str =>
                            if isIdent AllowDashes str
@@ -123,13 +123,13 @@ packageName = terminal "Expected package name"
 
 export
 dot' : Rule ()
-dot' = terminal "Expected dot"
+dot' = terminal "Expected dot" $
                 \case
                   Dot => Just ()
                   _ => Nothing
 
 sep' : Rule ()
-sep' = terminal "Expected separator"
+sep' = terminal "Expected separator" $
                 \case
                   Separator => Just ()
                   _ => Nothing

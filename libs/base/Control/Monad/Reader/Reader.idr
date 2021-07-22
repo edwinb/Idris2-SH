@@ -14,7 +14,7 @@ record ReaderT (stateType : Type) (m : Type -> Type) (a : Type) where
 ||| Transform the computation inside a @ReaderT@.
 public export %inline
 mapReaderT : (m a -> n b) -> ReaderT r m a -> ReaderT r n b
-mapReaderT f m = MkReaderT \st => f (runReaderT' m st)
+mapReaderT f m = MkReaderT $ \st => f (runReaderT' m st)
 
 ||| Unwrap and apply a ReaderT monad computation
 public export

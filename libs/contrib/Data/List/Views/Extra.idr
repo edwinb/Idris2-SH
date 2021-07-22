@@ -65,7 +65,7 @@ splitBalancedHelper revLs rs [] prf = MkSplitBal balancedLeftsAndRights
           mkBalancedEq Refl
 splitBalancedHelper revLs [] (x :: xs) prf =
   absurd $
-    the (0 = S (plus (length revLs) (length xs)))
+    the (0 = S (plus (length revLs) (length xs))) $
       rewrite plusSuccRightSucc (length revLs) (length xs) in
         prf
 splitBalancedHelper revLs (x :: rs) [lastItem] prf =

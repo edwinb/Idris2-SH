@@ -485,7 +485,7 @@ elabInterface {vars} ifc vis env nest constraints iname params dets mcon body
             = do if n /= n' then pure (IVar fc n') else do
                  log "ide-mode.highlight" 7 $
                    "elabDefault is trying to add Function: " ++ show n ++ " (" ++ show fc ++")"
-                 whenJust (isConcreteFC fc) \nfc => do
+                 whenJust (isConcreteFC fc) $ \nfc => do
                    log "ide-mode.highlight" 7 $ "elabDefault is adding Function: " ++ show n
                    addSemanticDecorations [(nfc, Function, Just n)]
                  pure (IVar fc dn)

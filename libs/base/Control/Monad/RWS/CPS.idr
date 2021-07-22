@@ -43,14 +43,14 @@ execRWST m r s = (\(_,s',w) => (s',w)) <$> runRWST m r s
 public export %inline
 mapRWST : (Functor n, Monoid w, Semigroup w')
         => (m (a, s, w) -> n (b, s, w')) -> RWST r w s m a -> RWST r w' s n b
-mapRWST f m = MkRWST \r,s,w =>
+mapRWST f m = MkRWST $ \r,s,w =>
                 (\(a,s',w') => (a,s',w <+> w')) <$> f (runRWST m r s)
 
 ||| `withRWST f m` executes action `m` with an initial environment
 ||| and state modified by applying `f`.
 public export %inline
 withRWST : (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
-withRWST f m = MkRWST \r,s => uncurry (unRWST m) (f r s)
+withRWST f m = MkRWST $ \r,s => uncurry (unRWST m) (f r s)
 
 --------------------------------------------------------------------------------
 --          RWS Functions
@@ -70,8 +70,8 @@ runRWS m r s = runIdentity (runRWST m r s)
 ||| Construct an RWS computation from a function. (The inverse of `runRWS`.)
 public export %inline
 rws : Semigroup w => (r -> s -> (a, s, w)) -> RWS r w s a
-rws f = MkRWST \r,s,w => let (a, s', w') = f r s
-                          in Id (a, s', w <+> w')
+rws f = MkRWST $ \r,s,w => let (a, s', w') = f r s
+                           in Id (a, s', w <+> w')
 
 ||| Evaluate a computation with the given initial state and environment,
 ||| returning the final value and output, discarding the final state.
@@ -92,7 +92,7 @@ execRWS m r s = let (_,s1,w) = runRWS m r s
 public export %inline
 mapRWS :  (Monoid w, Semigroup w')
        => ((a, s, w) -> (b, s, w')) -> RWS r w s a -> RWS r w' s b
-mapRWS f = mapRWST \(Id p) => Id (f p)
+mapRWS f = mapRWST $ \(Id p) => Id (f p)
 
 ||| `withRWS f m` executes action `m` with an initial environment
 ||| and state modified by applying `f`.
@@ -106,29 +106,29 @@ withRWS = withRWST
 
 public export %inline
 Functor m => Functor (RWST r w s m) where
-  map f m = MkRWST \r,s,w => (\(a,s',w') => (f a,s',w')) <$> unRWST m r s w
+  map f m = MkRWST $ \r,s,w => (\(a,s',w') => (f a,s',w')) <$> unRWST m r s w
 
 public export %inline
 Monad m => Applicative (RWST r w s m) where
-  pure a = MkRWST \_,s,w => pure (a,s,w)
+  pure a = MkRWST $ \_,s,w => pure (a,s,w)
   MkRWST mf <*> MkRWST mx =
-    MkRWST \r,s,w => do (f,s1,w1) <- mf r s w
-                        (a,s2,w2) <- mx r s1 w1
-                        pure (f a,s2,w2)
+    MkRWST $ \r,s,w => do (f,s1,w1) <- mf r s w
+                          (a,s2,w2) <- mx r s1 w1
+                          pure (f a,s2,w2)
 
 public export %inline
 (Monad m, Alternative m) => Alternative (RWST r w s m) where
-  empty = MkRWST \_,_,_ => empty
-  MkRWST m <|> MkRWST n = MkRWST \r,s,w => m r s w <|> n r s w
+  empty = MkRWST $ \_,_,_ => empty
+  MkRWST m <|> MkRWST n = MkRWST $ \r,s,w => m r s w <|> n r s w
 
 public export %inline
 Monad m => Monad (RWST r w s m) where
-  m >>= k = MkRWST \r,s,w => do (a,s1,w1) <- unRWST m r s w
-                                unRWST (k a) r s1 w1
+  m >>= k = MkRWST $ \r,s,w => do (a,s1,w1) <- unRWST m r s w
+                                  unRWST (k a) r s1 w1
 
 public export %inline
 MonadTrans (RWST r w s) where
-  lift m = MkRWST \_,s,w => map (\a => (a,s,w)) m
+  lift m = MkRWST $ \_,s,w => map (\a => (a,s,w)) m
 
 public export %inline
 HasIO m => HasIO (RWST r w s m) where

@@ -37,8 +37,8 @@ Monad m => MonadReader stateType (ReaderT stateType m) where
 
 public export %inline
 Monad m => MonadReader r (RWST r w s m) where
-  ask       = MkRWST \r,s,w => pure (r,s,w)
-  local f m = MkRWST \r,s,w => unRWST m (f r) s w
+  ask       = MkRWST $ \r,s,w => pure (r,s,w)
+  local f m = MkRWST $ \r,s,w => unRWST m (f r) s w
 
 public export %inline
 MonadReader r m => MonadReader r (EitherT e m) where
@@ -64,4 +64,4 @@ MonadReader r m => MonadReader r (WriterT w m) where
   -- this should require a Monoid instance to further
   -- accumulate values, while the implementation of
   -- MonadReader for RWST does no such thing.
-  local f (MkWriterT m) = MkWriterT \w => local f (m w)
+  local f (MkWriterT m) = MkWriterT $ \w => local f (m w)

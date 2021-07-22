@@ -241,7 +241,7 @@ checkTermSub defining mode opts nest env env' sub tm ty
             catch {t = Error}
                   (elabTermSub defining mode opts nest
                                env env' sub tm (Just ty))
-                  \case
+                  $ \case
                     TryWithImplicits loc benv ns
                       => do put Ctxt defs
                             put UST ust

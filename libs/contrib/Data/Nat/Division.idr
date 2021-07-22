@@ -212,7 +212,7 @@ multiplesModuloZero : (fuel, predn, k : Nat)
        -> (enough : fuel `GTE` k * (S predn) )
        -> mod' fuel (k * (S predn)) predn = 0
 multiplesModuloZero 0        predn k enough =
-  let (k_eq_z, _) = multiplicationLemma k predn 0
+  let (k_eq_z, _) = multiplicationLemma k predn 0 $
                     rewrite plusZeroRightNeutral (k * (S predn)) in
                     enough
   in rewrite k_eq_z in
