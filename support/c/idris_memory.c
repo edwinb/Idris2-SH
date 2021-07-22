@@ -35,3 +35,9 @@ void* idrnet_malloc(int size) {
 void idrnet_free(void* ptr) {
     idris2_free(ptr);
 }
+
+char* idris2_strdup(const char* s) {
+    char* r = strdup(s);
+    IDRIS2_VERIFY(r, "strdup failed");
+    return r;
+}

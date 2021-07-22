@@ -41,6 +41,9 @@ prim__malloc : (size : Int) -> PrimIO AnyPtr
 %foreign "C:idris2_free, libidris2_support, idris_memory.h"
 prim__free : AnyPtr -> PrimIO ()
 
+%foreign "C:idris2_strdup, libidris2_support, idris_memory.h"
+prim__strdup : String -> PrimIO (Ptr String)
+
 ||| Allocate memory with libc `malloc`.
 export
 malloc : HasIO io => (size : Int) -> io AnyPtr
@@ -50,3 +53,7 @@ malloc size = primIO $ prim__malloc size
 export
 free : HasIO io => AnyPtr -> io ()
 free ptr = primIO $ prim__free ptr
+
+export
+strdup : HasIO io => String -> io (Ptr String)
+strdup s = primIO $ prim__strdup s

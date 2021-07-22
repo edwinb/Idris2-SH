@@ -3,6 +3,7 @@ module System
 import public Data.So
 import Data.List
 import Data.String
+import System.FFI
 
 %default total
 
@@ -100,12 +101,16 @@ unsetEnv var
    = do ok <- primIO $ prim__unsetEnv var
         pure $ ok == 0
 
-%foreign "C:idris2_system, libidris2_support, idris_system.h"
-prim__system : String -> PrimIO Int
+%foreign "C__collect_safe:idris2_system, libidris2_support, idris_system.h"
+         "C:idris2_system, libidris2_support, idris_system.h"
+prim__system : Ptr String -> PrimIO Int
 
 export
 system : HasIO io => String -> io Int
-system cmd = primIO (prim__system cmd)
+system cmd = do cmdS <- strdup cmd
+                r <- primIO (prim__system cmdS)
+                free $ prim__forgetPtr cmdS
+                pure r
 
 %foreign "C:idris2_time, libidris2_support, idris2_support.h"
 prim__time : PrimIO Int
