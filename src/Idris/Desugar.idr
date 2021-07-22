@@ -334,8 +334,18 @@ mutual
          pure $ Implicit fc False
   desugarB side ps (PMultiline fc indent lines)
       = addFromString fc !(expandString side ps fc !(trimMultiline fc indent lines))
+
+  -- We only add `fromString` if we are looking at a plain string literal.
+  -- Interpolated string literals don't have a `fromString` call since they
+  -- are always concatenated with other strings and therefore can never use
+  -- another `fromString` implementation that differs from `id`.
+  desugarB side ps (PString fc [])
+      = addFromString fc (IPrimVal fc (Str ""))
+  desugarB side ps (PString fc [StrLiteral fc' str])
+      = addFromString fc (IPrimVal fc' (Str str))
   desugarB side ps (PString fc strs)
-      = addFromString fc !(expandString side ps fc strs)
+      = expandString side ps fc strs
+
   desugarB side ps (PDoBlock fc ns block)
       = expandDo side ps fc ns block
   desugarB side ps (PBang fc term)
