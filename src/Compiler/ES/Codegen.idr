@@ -516,6 +516,7 @@ jsPrim (NS _ (UN "prim__newIORef")) [_,v,_] = pure $ hcat ["({value:", v, "})"]
 jsPrim (NS _ (UN "prim__readIORef")) [_,r,_] = pure $ hcat ["(", r, ".value)"]
 jsPrim (NS _ (UN "prim__writeIORef")) [_,r,v,_] = pure $ hcat ["(", r, ".value=", v, ")"]
 jsPrim (NS _ (UN "prim__newArray")) [_,s,v,_] = pure $ hcat ["(Array(", s, ").fill(", v, "))"]
+jsPrim (NS _ (UN "prim__newUninitArray")) [_,s,_] = pure $ hcat ["(Array(", s, "))"]
 jsPrim (NS _ (UN "prim__arrayGet")) [_,x,p,_] = pure $ hcat ["(", x, "[", p, "])"]
 jsPrim (NS _ (UN "prim__arraySet")) [_,x,p,v,_] = pure $ hcat ["(", x, "[", p, "]=", v, ")"]
 jsPrim (NS _ (UN "prim__os")) [] = pure $ Text $ esName "sysos"

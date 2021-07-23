@@ -20,6 +20,13 @@ newArray : HasIO io => Int -> io (IOArray elem)
 newArray size
     = pure (MkIOArray size !(primIO (prim__newArray size Nothing)))
 
+-- Create an array with elements uninitialized.
+-- Elements must not be read before elements are written.
+partial
+newArrayUninitUnsafe : HasIO io => Int -> io (IOArray elem)
+newArrayUninitUnsafe size
+    = pure (MkIOArray size !(primIO (prim__newUninitArray size)))
+
 export
 writeArray : HasIO io => IOArray elem -> Int -> elem -> io Bool
 writeArray arr pos el
@@ -70,9 +77,9 @@ toList arr = iter 0 (max arr) []
 export
 fromList : HasIO io => List (Maybe elem) -> io (IOArray elem)
 fromList ns
-    = do arr <- newArray (cast (length ns))
-         addToArray 0 ns arr
-         pure arr
+    = assert_total $ do arr <- newArrayUninitUnsafe (cast (length ns))
+                        addToArray 0 ns arr
+                        pure arr
   where
     addToArray : Int -> List (Maybe elem) -> IOArray elem -> io ()
     addToArray loc [] arr = pure ()

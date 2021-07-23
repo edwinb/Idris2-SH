@@ -124,6 +124,13 @@ Value *newArray(Value *erased, Value *_length, Value *v, Value *_word)
     return (Value *)a;
 }
 
+Value *newUninitArray(Value *erased, Value *cap, Value *_word)
+{
+    int cap_int = extractInt(cap);
+    Value_Array *a = makeArray(cap_int);
+    return (Value *)a;
+}
+
 Value *arrayGet(Value *erased, Value *_array, Value *_index, Value *_word)
 {
     Value_Array *a = (Value_Array *)_array;

@@ -18,6 +18,7 @@ Value* idris2_crash(Value* msg);
 // Array
 
 Value *newArray(Value *, Value *, Value *, Value *);
+Value *newUninitArray(Value *, Value *, Value *);
 Value *arrayGet(Value *, Value *, Value *, Value *);
 Value *arraySet(Value *, Value *, Value *, Value *, Value *);
 

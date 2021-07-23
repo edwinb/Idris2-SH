@@ -200,7 +200,7 @@ cOp fn args = plainOp (show fn) (toList args)
 
 
 data ExtPrim = NewIORef | ReadIORef | WriteIORef
-             | NewArray | ArrayGet | ArraySet
+             | NewArray | NewUninitArray | ArrayGet | ArraySet
              | GetField | SetField
              | VoidElim
              | SysOS | SysCodegen
@@ -214,6 +214,7 @@ Show ExtPrim where
   show ReadIORef = "readIORef"
   show WriteIORef = "writeIORef"
   show NewArray = "newArray"
+  show NewUninitArray = "newUninitArray"
   show ArrayGet = "arrayGet"
   show ArraySet = "arraySet"
   show GetField = "getField"
@@ -232,6 +233,7 @@ toPrim pn@(NS _ n)
             (n == UN "prim__readIORef", ReadIORef),
             (n == UN "prim__writeIORef", WriteIORef),
             (n == UN "prim__newArray", NewArray),
+            (n == UN "prim__newUninitArray", NewUninitArray),
             (n == UN "prim__arrayGet", ArrayGet),
             (n == UN "prim__arraySet", ArraySet),
             (n == UN "prim__getField", GetField),
