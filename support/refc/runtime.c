@@ -1,6 +1,16 @@
 #include "runtime.h"
 #include "refc_util.h"
 
+#ifdef INTEGER_USE_LIBBF
+extern void init_bf();
+#endif
+
+void init_idris2() {
+#ifdef INTEGER_USE_LIBBF
+  init_bf();
+#endif
+}
+
 void missing_ffi()
 {
   fprintf(
@@ -82,7 +92,13 @@ int extractInt(Value *v)
 {
   if (v->header.tag == INTEGER_TAG)
   {
+#ifdef INTEGER_USE_LIBBF
+    int64_t res;
+    bf_get_int64(&res, &((Value_Integer*)v)->i, 0);
+    return (int)res;
+#else
     return (int)mpz_get_si(((Value_Integer *)v)->i);
+#endif
   }
 
   if (v->header.tag == INT8_TAG)

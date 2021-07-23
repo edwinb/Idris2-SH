@@ -2,6 +2,7 @@
 
 #include "cBackend.h"
 
+void init_idris2();
 void missing_ffi();
 
 Value *apply_closure(Value *, Value *arg);

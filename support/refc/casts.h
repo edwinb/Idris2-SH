@@ -2,7 +2,6 @@
 
 #include "cBackend.h"
 #include <stdio.h>
-#include <gmp.h>
 
 Value *cast_Int8_to_Bits8(Value *);
 Value *cast_Int8_to_Bits16(Value *);

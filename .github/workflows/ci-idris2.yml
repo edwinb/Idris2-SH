@@ -300,9 +300,11 @@ jobs:
           echo "$HOME/.idris2/bin" >> $GITHUB_PATH
           chmod +x $HOME/.idris2/bin/idris2 $HOME/.idris2/bin/idris2_app/*
       - name: Build self-hosted
-        run: make all IDRIS2_BOOT="idris2 -Werror" && make install
+        run: make all IDRIS2_BOOT="idris2 -Werror" BUILD_REFC_WITH_LIBBF=1 && make install BUILD_REFC_WITH_LIBBF=1
       - name: Test self-hosted
         run: make test INTERACTIVE=''
+      - name: Test self-hosted refc libbf
+        run: make test only=refc INTERACTIVE='' BUILD_REFC_WITH_LIBBF=1 IDRIS_REFC_INTEGER=libbf
 
   macos-self-host-chez:
     needs: macos-bootstrap-chez

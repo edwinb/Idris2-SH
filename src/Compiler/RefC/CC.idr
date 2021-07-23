@@ -7,17 +7,31 @@ import Core.Options
 import System
 
 import Idris.Version
+import Idris.Env
+
 import Libraries.Utils.Path
 
 %default total
 
+data RefCIntegerImplementation =
+    GMP |
+    LibBF
+
 findCC : IO String
 findCC
-    = do Nothing <- getEnv "IDRIS2_CC"
+    = do Nothing <- idrisGetEnv "IDRIS2_CC"
            | Just cc => pure cc
-         Nothing <- getEnv "CC"
+         Nothing <- idrisGetEnv "CC"
            | Just cc => pure cc
          pure "cc"
+
+getRefCIntegerImplementation : Core RefCIntegerImplementation
+getRefCIntegerImplementation
+    = do Nothing <- coreLift $ idrisGetEnv "IDRIS_REFC_INTEGER"
+           | Just "gmp" => pure GMP
+           | Just "libbf" => pure LibBF
+           | Just _ => throw (UserError "IDRIS_REFC_INTEGER should be \"gmp\" or \"libbf\"")
+         pure GMP
 
 fullprefix_dir : Dirs -> String -> String
 fullprefix_dir dirs sub
@@ -34,8 +48,11 @@ compileCObjectFile {asLibrary} sourceFile objectFile =
      dirs <- getDirs
 
      let libraryFlag = if asLibrary then "-fpic " else ""
+     let intImplFlag = case !getRefCIntegerImplementation of
+                           GMP => ""
+                           LibBF => " -DINTEGER_USE_LIBBF "
 
-     let runccobj = cc ++ " -Werror -c " ++ libraryFlag ++ sourceFile ++
+     let runccobj = cc ++ " -Werror -c " ++ libraryFlag ++ intImplFlag ++ sourceFile ++
                        " -o " ++ objectFile ++ " " ++
                        "-I" ++ fullprefix_dir dirs "refc " ++
                        "-I" ++ fullprefix_dir dirs "include"
@@ -57,14 +74,15 @@ compileCFile {asShared} objectFile outFile =
      dirs <- getDirs
 
      let sharedFlag = if asShared then "-shared " else ""
+     let intImplFlag = case !getRefCIntegerImplementation of
+                           GMP => "-lidris2_refc -lgmp -lm"
+                           LibBF => "-lidris2_refc_libbf -lm"
 
      let runcc = cc ++ " -Werror " ++ sharedFlag ++ objectFile ++
                        " -o " ++ outFile ++ " " ++
                        (fullprefix_dir dirs "lib" </> "libidris2_support.a") ++ " " ++
-                       "-lidris2_refc " ++
                        "-L" ++ fullprefix_dir dirs "refc " ++
-                       clibdirs (lib_dirs dirs) ++
-                       "-lgmp -lm"
+                       clibdirs (lib_dirs dirs) ++ intImplFlag
 
      log "compiler.refc.cc" 10 runcc
      0 <- coreLift $ system runcc

@@ -12,6 +12,9 @@ TARGET = ${TARGETDIR}/${NAME}
 # builds, but overridable via environment variables or arguments to make
 IDRIS2_CG ?= chez
 
+# Optional integer implementation with libbf (will download it if set to 1)
+BUILD_REFC_WITH_LIBBF ?= 0
+
 MAJOR=0
 MINOR=4
 PATCH=0
@@ -142,11 +145,26 @@ support:
 	@${MAKE} -C support/c
 	@${MAKE} -C support/refc
 	@${MAKE} -C support/chez
+ifeq ($(BUILD_REFC_WITH_LIBBF), 1)
+ifeq ("$(wildcard support/refc/libbf.c)","")
+	wget https://bellard.org/quickjs/quickjs-2021-03-27.tar.xz
+	tar xf quickjs-2021-03-27.tar.xz
+	cp quickjs-2021-03-27/cutils.* support/refc
+	cp quickjs-2021-03-27/libbf.* support/refc
+endif
+	rm -rf quickjs-2021-03-27*
+	cp -a support/refc support/refc_libbf
+	@${MAKE} -C support/refc_libbf USE_LIBBF=1 clean	
+	@${MAKE} -C support/refc_libbf USE_LIBBF=1
+endif
 
 support-clean:
 	@${MAKE} -C support/c clean
 	@${MAKE} -C support/refc clean
 	@${MAKE} -C support/chez clean
+ifeq ($(BUILD_REFC_WITH_LIBBF), 1)
+	rm -rf support/refc_libbf
+endif
 
 clean-libs:
 	${MAKE} -C libs/prelude clean
@@ -192,6 +210,9 @@ install-support:
 	@${MAKE} -C support/c install
 	@${MAKE} -C support/refc install
 	@${MAKE} -C support/chez install
+ifeq ($(BUILD_REFC_WITH_LIBBF), 1)
+	@${MAKE} -C support/refc_libbf USE_LIBBF=1 install
+endif
 
 install-libs:
 	${MAKE} -C libs/prelude install IDRIS2?=${TARGET} IDRIS2_PATH=${IDRIS2_BOOT_PATH}

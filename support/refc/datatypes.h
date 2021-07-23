@@ -5,7 +5,12 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdint.h>
+
+#ifdef INTEGER_USE_LIBBF
+#include "libbf.h"
+#else
 #include <gmp.h>
+#endif
 
 #include "buffer.h"
 
@@ -104,7 +109,11 @@ typedef struct
 typedef struct
 {
     Value_header header;
+#ifdef INTEGER_USE_LIBBF
+    bf_t i;
+#else
     mpz_t i;
+#endif
 } Value_Integer;
 
 typedef struct

@@ -993,6 +993,7 @@ footer = do
     emit EmptyFC " // main function"
     emit EmptyFC "int main(int argc, char *argv[])"
     emit EmptyFC "{"
+    emit EmptyFC "   init_idris2();"
     if contains "idris_support.h" !(get HeaderFiles)
        then emit EmptyFC "   idris2_setArgs(argc, argv);"
        else pure ()

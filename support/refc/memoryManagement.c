@@ -1,6 +1,20 @@
 #include "runtime.h"
 #include "refc_util.h"
 
+#ifdef INTEGER_USE_LIBBF
+static bf_context_t bf_ctx;
+
+static void* my_bf_realloc(void* opaque, void* ptr, size_t size)
+{
+    return realloc(ptr, size);
+}
+
+void init_bf()
+{
+    bf_context_init(&bf_ctx, my_bf_realloc, NULL);
+}
+#endif
+
 Value *newValue(size_t size)
 {
     Value *retVal = (Value *)malloc(size);
@@ -137,14 +151,22 @@ Value_Integer *makeInteger()
 {
     Value_Integer *retVal = IDRIS2_NEW_VALUE(Value_Integer);
     retVal->header.tag = INTEGER_TAG;
+#ifdef INTEGER_USE_LIBBF
+    bf_init(&bf_ctx, &retVal->i);
+#else
     mpz_init(retVal->i);
+#endif
     return retVal;
 }
 
 Value_Integer *makeIntegerLiteral(char *i)
 {
     Value_Integer *retVal = makeInteger();
+#ifdef INTEGER_USE_LIBBF
+    bf_atof(&retVal->i, i, NULL, 10, BF_PREC_INF, BF_RNDZ);
+#else
     mpz_set_str(retVal->i, i, 10);
+#endif
     return retVal;
 }
 
@@ -248,7 +270,11 @@ void removeReference(Value *elem)
             break;
         case INTEGER_TAG:
         {
+#ifdef INTEGER_USE_LIBBF
+            bf_delete(&((Value_Integer*)elem)->i);
+#else
             mpz_clear(((Value_Integer *)elem)->i);
+#endif
             break;
         }
         case DOUBLE_TAG:
