@@ -40,7 +40,7 @@ findChez
     = do Nothing <- idrisGetEnv "CHEZ"
             | Just chez => pure chez
          path <- pathLookup ["chez", "chezscheme", "chezscheme9.5", "scheme"]
-         pure $ fromMaybe "/usr/bin/env scheme" path
+         pure $ "\"" ++ fromMaybe "/usr/bin/env scheme" path ++ "\""
 
 ||| Returns the chez scheme version for given executable
 |||
