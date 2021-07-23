@@ -30,7 +30,6 @@ int idris2_createDir(char* dir) {
 
 typedef struct {
     DIR* dirptr;
-    int error;
 } DirInfo;
 
 void* idris2_openDir(char* dir) {
@@ -41,7 +40,6 @@ void* idris2_openDir(char* dir) {
         DirInfo* di = malloc(sizeof(DirInfo));
         IDRIS2_VERIFY(di, "malloc failed");
         di->dirptr = d;
-        di->error = 0;
 
         return (void*)di;
     }
@@ -67,7 +65,6 @@ char* idris2_nextDirEntry(void* d) {
     struct dirent* de = readdir(di->dirptr);
 
     if (de == NULL) {
-        di->error = -1;
         return NULL;
     } else {
         return de->d_name;
