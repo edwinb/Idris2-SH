@@ -15,7 +15,7 @@ interface Array arr where
 -- Mutable arrays which can be used linearly
 public export
 interface Array arr => MArray arr where
-  newArray : (size : Int) -> (1 _ : (1 _ : arr t) -> a) -> a
+  newArray : (size : Int) -> t -> (1 _ : (1 _ : arr t) -> a) -> a
   -- Array is unchanged if the index is out of bounds
   write : (1 _ : arr t) -> Int -> t -> Res Bool (const (arr t))
 
@@ -42,7 +42,7 @@ Array LinArray where
 
 export
 MArray LinArray where
-  newArray size k = k (MkLinArray (unsafePerformIO (newArray size)))
+  newArray size init k = k (MkLinArray (unsafePerformIO (newArray size init)))
 
   write (MkLinArray a) i el
       = unsafePerformIO (do ok <- writeArray a i el
@@ -57,11 +57,11 @@ Array IArray where
   size (MkIArray a) = max a
 
 export
-copyArray : MArray arr => (newsize : Int) -> (1 _ : arr t) ->
+copyArray : MArray arr => (newsize : Int) -> (init : t) -> (1 _ : arr t) ->
             LPair (arr t) (arr t)
-copyArray newsize a
+copyArray newsize init a
     = let size # a = msize a in
-          newArray newsize $
+          newArray newsize init $
             copyContent (min (newsize - 1) (size - 1)) a
   where
     copyContent : Int -> (1 _ : arr t) -> (1 _ : arr t) -> LPair (arr t) (arr t)

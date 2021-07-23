@@ -4,7 +4,7 @@ import System
 
 main : IO ()
 main
-    = do x <- newArray 20
+    = do x <- newArray 20 ""
          True <- writeArray x 10 "Hello"
            | False => do putStrLn "should success 1"
                          exitFailure
@@ -18,5 +18,5 @@ main
 
          printLn !(toList x)
 
-         y <- fromList (map Just [1,2,3,4,5])
+         y <- fromList 0 [1,2,3,4,5]
          printLn !(toList y)

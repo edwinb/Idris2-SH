@@ -1,4 +1,4 @@
 1/1: Building array (array.idr)
-Main> [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Just "Hello", Just "World", Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
-[Just 1, Just 2, Just 3, Just 4, Just 5]
+Main> ["", "", "", "", "", "", "", "", "", "", "Hello", "World", "", "", "", "", "", "", "", ""]
+[1, 2, 3, 4, 5]
 Main> Bye for now!
