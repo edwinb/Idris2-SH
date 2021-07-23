@@ -109,22 +109,34 @@ Functor m => Functor (RWST r w s m) where
   map f m = MkRWST \r,s,w => (\(a,s',w') => (f a,s',w')) <$> unRWST m r s w
 
 public export %inline
-Monad m => Applicative (RWST r w s m) where
-  pure a = MkRWST \_,s,w => pure (a,s,w)
+Monad m => Apply (RWST r w s m) where
   MkRWST mf <*> MkRWST mx =
     MkRWST \r,s,w => do (f,s1,w1) <- mf r s w
                         (a,s2,w2) <- mx r s1 w1
                         pure (f a,s2,w2)
 
 public export %inline
-(Monad m, Alternative m) => Alternative (RWST r w s m) where
-  empty = MkRWST \_,_,_ => empty
+Monad m => Applicative (RWST r w s m) where
+  pure a = MkRWST \_,s,w => pure (a,s,w)
+
+public export %inline
+(Monad m, Alt m) => Alt (RWST r w s m) where
   MkRWST m <|> MkRWST n = MkRWST \r,s,w => m r s w <|> n r s w
 
 public export %inline
-Monad m => Monad (RWST r w s m) where
+(Monad m, Plus m) => Plus (RWST r w s m) where
+  empty = MkRWST \_,_,_ => empty
+
+public export %inline
+(Monad m, Plus m) => Alternative (RWST r w s m) where
+
+public export %inline
+Monad m => Bind (RWST r w s m) where
   m >>= k = MkRWST \r,s,w => do (a,s1,w1) <- unRWST m r s w
                                 unRWST (k a) r s1 w1
+
+public export %inline
+Monad m => Monad (RWST r w s m) where
 
 public export %inline
 MonadTrans (RWST r w s) where

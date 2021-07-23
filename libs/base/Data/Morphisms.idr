@@ -35,13 +35,19 @@ Functor (Morphism r) where
   map f (Mor a) = Mor $ f . a
 
 export
-Applicative (Morphism r) where
-  pure a = Mor $ const a
+Apply (Morphism r) where
   (Mor f) <*> (Mor a) = Mor $ \r => f r $ a r
 
 export
-Monad (Morphism r) where
+Applicative (Morphism r) where
+  pure a = Mor $ const a
+
+export
+Bind (Morphism r) where
   (Mor h) >>= f = Mor $ \r => applyMor (f $ h r) r
+
+export
+Monad (Morphism r) where
 
 export
 Semigroup a => Semigroup (Morphism r a) where
@@ -64,15 +70,21 @@ Functor f => Functor (Kleislimorphism f a) where
   map f (Kleisli g) = Kleisli (map f . g)
 
 export
-Applicative f => Applicative (Kleislimorphism f a) where
-  pure a = Kleisli $ const $ pure a
+Apply f => Apply (Kleislimorphism f a) where
   (Kleisli f) <*> (Kleisli a) = Kleisli $ \r => f r <*> a r
 
 export
-Monad f => Monad (Kleislimorphism f a) where
+Applicative f => Applicative (Kleislimorphism f a) where
+  pure a = Kleisli $ const $ pure a
+
+export
+Bind f => Bind (Kleislimorphism f a) where
   (Kleisli f) >>= g = Kleisli $ \r => do
     k1 <- f r
     applyKleisli (g k1) r
+
+export
+Monad f => Monad (Kleislimorphism f a) where
 
 public export
 Contravariant (Op b) where

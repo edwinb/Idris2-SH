@@ -50,13 +50,16 @@ Bitraversable Validated where
 
 ||| Applicative composition preserves invalidity sequentially accumulating all errors.
 public export
-Semigroup e => Applicative (Validated e) where
-  pure = Valid
-
+Semigroup e => Apply (Validated e) where
   Valid f    <*> Valid x    = Valid $ f x
   Invalid e1 <*> Invalid e2 = Invalid $ e1 <+> e2
   Invalid e  <*> Valid _    = Invalid e
   Valid _    <*> Invalid e  = Invalid e
+
+||| Applicative composition preserves invalidity sequentially accumulating all errors.
+public export
+Semigroup e => Applicative (Validated e) where
+  pure = Valid
 
 -- There is no `Monad` implementation because it can't be coherent with the accumulating `Applicative` one.
 
@@ -72,14 +75,20 @@ public export
 Monoid e => Monoid (Validated e a) where
   neutral = Invalid neutral
 
-||| Alternative composition preserves validity selecting the leftmost valid value.
+||| Alt composition preserves validity selecting the leftmost valid value.
 ||| If both sides are invalid, errors are accumulated.
 public export
-Monoid e => Alternative (Validated e) where
-  empty = neutral
+Semigroup e => Alt (Validated e) where
   l@(Valid _) <|> _           = l
   _           <|> r@(Valid _) = r
   Invalid e1  <|> Invalid e2  = Invalid $ e1 <+> e2
+
+public export
+Monoid e => Plus (Validated e) where
+  empty = neutral
+
+public export
+Monoid e => Alternative (Validated e) where
 
 public export
 Foldable (Validated e) where

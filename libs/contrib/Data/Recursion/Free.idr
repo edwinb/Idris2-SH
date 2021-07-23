@@ -69,13 +69,19 @@ Functor (General a b) where
   map f = fold (Tell . f) Ask
 
 public export
-Applicative (General a b) where
-  pure = Tell
+Apply (General a b) where
   gf <*> gv = bind gf (\ f => map (f $) gv)
 
 public export
-Monad (General a b) where
+Applicative (General a b) where
+  pure = Tell
+
+public export
+Bind (General a b) where
   (>>=) = bind
+
+public export
+Monad (General a b) where
 
 ------------------------------------------------------------------------
 -- Fuel-based (partial) evaluation

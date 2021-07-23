@@ -18,8 +18,7 @@ Functor IO where
 
 %inline
 public export
-Applicative IO where
-  pure x = io_pure x
+Apply IO where
   f <*> a
       = io_bind f (\f' =>
           io_bind a (\a' =>
@@ -27,8 +26,17 @@ Applicative IO where
 
 %inline
 public export
-Monad IO where
+Applicative IO where
+  pure x = io_pure x
+
+%inline
+public export
+Bind IO where
   b >>= k = io_bind b k
+
+%inline
+public export
+Monad IO where
 
 public export
 interface Monad io => HasIO io where

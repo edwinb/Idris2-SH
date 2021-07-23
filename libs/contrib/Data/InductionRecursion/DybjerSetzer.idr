@@ -56,10 +56,16 @@ Functor (Code i) where
   map f v = bind v (Yield . f)
 
 public export
-Applicative (Code i) where
-  pure = Yield
+Apply (Code i) where
   cf <*> co = bind cf (\ f => map (f $) co)
 
 public export
-Monad (Code i) where
+Applicative (Code i) where
+  pure = Yield
+
+public export
+Bind (Code i) where
   (>>=) = bind
+
+public export
+Monad (Code i) where

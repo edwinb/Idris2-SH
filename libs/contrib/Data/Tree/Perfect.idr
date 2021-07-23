@@ -32,11 +32,13 @@ replicate Z a = Leaf a
 replicate (S n) a = let t = replicate n a in Node t t
 
 public export
-{n : _} -> Applicative (Tree n) where
-  pure = replicate n
-
+Apply (Tree n) where
   Leaf f <*> Leaf a = Leaf (f a)
   Node fl fr <*> Node xl xr = Node (fl <*> xl) (fr <*> xr)
+
+public export
+{n : _} -> Applicative (Tree n) where
+  pure = replicate n
 
 public export
 data Path : Nat -> Type where

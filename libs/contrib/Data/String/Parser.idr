@@ -44,24 +44,36 @@ Functor m => Functor (ParseT m) where
     map f p = P $ \s => map (map f) (p.runParser s)
 
 public export
-Monad m => Applicative (ParseT m) where
-    pure x = P $ \s => pure $ OK x s
+Monad m => Apply (ParseT m) where
     f <*> x = P $ \s => case !(f.runParser s) of
                             OK f' s' => map (map f') (x.runParser s')
                             Fail i err => pure $ Fail i err
 
 public export
-Monad m => Alternative (ParseT m) where
-    empty = P $ \s => pure $ Fail s.pos "no alternative left"
+Monad m => Applicative (ParseT m) where
+    pure x = P $ \s => pure $ OK x s
+
+public export
+Monad m => Alt (ParseT m) where
     a <|> b = P $ \s => case !(a.runParser s) of
                             OK r s' => pure $ OK r s'
                             Fail _ _ => b.runParser s
 
 public export
-Monad m => Monad (ParseT m) where
+Monad m => Plus (ParseT m) where
+    empty = P $ \s => pure $ Fail s.pos "no alternative left"
+
+public export
+Monad m => Alternative (ParseT m) where
+
+public export
+Monad m => Bind (ParseT m) where
     m >>= k = P $ \s => case !(m.runParser s) of
                              OK a s' => (k a).runParser s'
                              Fail i err => pure $ Fail i err
+
+public export
+Monad m => Monad (ParseT m) where
 
 public export
 MonadTrans ParseT where

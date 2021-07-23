@@ -29,14 +29,18 @@ mutual
       map func x = do val <- x
                       Pure (func val)
 
-  Applicative (State stateType) where
-      pure x = Pure x
+  Apply (State stateType) where
       (<*>) f a = do func <- f
                      arg <- a
                      pure (func arg)
 
-  Monad (State stateType) where
+  Applicative (State stateType) where
+      pure x = Pure x
+
+  Bind (State stateType) where
       (>>=) = Bind
+
+  Monad (State stateType) where
 
 runState : State stateType a -> (st : stateType) -> (a, stateType)
 runState Get st = (st, st)

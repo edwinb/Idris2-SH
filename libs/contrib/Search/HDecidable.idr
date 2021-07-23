@@ -67,24 +67,36 @@ Functor HDec where
   map f (MkHDec b prf) = MkHDec b (f . prf)
 
 public export
-Applicative HDec where
-  pure = yes
+Apply HDec where
   MkHDec False prff <*> _ = MkHDec False absurd
   _ <*> MkHDec False _ = MkHDec False absurd
   MkHDec True prff <*> MkHDec True prfx
     = yes (prff Oh (prfx Oh))
 
+public export
+Applicative HDec where
+  pure = yes
+
 ||| Lazy in the second argument
 public export
-Alternative HDec where
-  empty = no
+Alt HDec where
   p@(MkHDec True _) <|> _ = p
   _ <|> q = q
 
 public export
-Monad HDec where
+Plus HDec where
+  empty = no
+
+public export
+Alternative HDec where
+
+public export
+Bind HDec where
   MkHDec True x >>= f = f (x Oh)
   _ >>= _ = no
+
+public export
+Monad HDec where
 
 public export
 Show f => Show (HDec f) where

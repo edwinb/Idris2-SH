@@ -19,7 +19,7 @@ c1 : Monad m => m (Either String Int)
 c1 = f1 1 *> f2 1
 
 c2 : Monad m => m (Either String Int)
-c2 = (f1 1 *> f2 1) @{Applicative.Compose}
+c2 = (f1 1 *> f2 1) @{Apply.Compose}
 
 c3 : Monad m => m (Either String Int)
 c3 = runEitherT $ MkEitherT {m} (f1 1) *> MkEitherT {m} (f2 1)

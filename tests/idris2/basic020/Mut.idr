@@ -30,15 +30,19 @@ mutual
         = do b' <- b
              pure (f b')
 
-  Applicative Box where
+  Apply Box where
     (<*>) f a
         = do f' <- f
              a' <- a
              pure (f' a')
+
+  Applicative Box where
     pure = MkBox
 
-  Monad Box where
+  Bind Box where
     (>>=) (MkBox val) k = k val
+
+  Monad Box where
 
 boxy : Box Integer
 boxy = map (*2) (MkBox 20)

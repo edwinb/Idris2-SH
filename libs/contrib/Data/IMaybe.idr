@@ -18,6 +18,9 @@ Functor (IMaybe b) where
   map f Nothing = Nothing
 
 public export
+Apply (IMaybe True) where
+  Just f <*> Just x = Just (f x)
+
+public export
 Applicative (IMaybe True) where
   pure = Just
-  Just f <*> Just x = Just (f x)

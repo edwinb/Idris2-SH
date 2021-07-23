@@ -68,12 +68,7 @@ Main> Prelude.show : Show ty => ty -> String
   Totality: total
 Main> Prelude.Monad : (Type -> Type) -> Type
   Parameters: m
-  Constraints: Applicative m
-  Methods:
-    (>>=) : m a -> (a -> m b) -> m b
-      Also called `bind`.
-    join : m (m a) -> m a
-      Also called `flatten` or mu.
+  Constraints: Applicative m, Bind m
   Implementations:
     Monad IO
     Monoid a => Monad (Pair a)

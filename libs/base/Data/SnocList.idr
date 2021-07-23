@@ -111,13 +111,19 @@ Foldable SnocList where
   foldMap f = foldl (\xs, x => xs <+> f x) neutral
 
 public export
-Applicative SnocList where
-  pure = (:<) Lin
+Apply SnocList where
   fs <*> xs = concatMap (flip map xs) fs
 
 public export
-Monad SnocList where
+Applicative SnocList where
+  pure = (:<) Lin
+
+public export
+Bind SnocList where
   xs >>= k = concatMap k xs
+
+public export
+Monad SnocList where
 
 public export
 Traversable SnocList where
@@ -125,9 +131,15 @@ Traversable SnocList where
   traverse f (xs :< x) = [| traverse f xs :< f x |]
 
 public export
-Alternative SnocList where
-  empty = Lin
+Alt SnocList where
   xs <|> ys = xs ++ ys
+
+public export
+Plus SnocList where
+  empty = Lin
+
+public export
+Alternative SnocList where
 
 ||| Check if something is a member of a snoc-list using the default Boolean equality.
 public export

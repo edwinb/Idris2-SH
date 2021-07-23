@@ -168,13 +168,19 @@ namespace Pair
 --------------------------------------------------------------------------------
 
 export
-Applicative Stream where
-  pure = repeat
+Apply Stream where
   (<*>) = zipWith apply
 
 export
-Monad Stream where
+Applicative Stream where
+  pure = repeat
+
+export
+Bind Stream where
   s >>= f = diag (map f s)
+
+export
+Monad Stream where
 
 --------------------------------------------------------------------------------
 -- Properties

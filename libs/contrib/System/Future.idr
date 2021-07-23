@@ -25,14 +25,20 @@ Functor Future where
   map func future = fork $ func (await future)
 
 public export
-Applicative Future where
-  pure v = fork v
+Apply Future where
   funcF <*> v = fork $ (await funcF) (await v)
 
 public export
-Monad Future where
+Applicative Future where
+  pure v = fork v
+
+public export
+Bind Future where
   join = map await
   v >>= func = join . fork $ func (await v)
+
+public export
+Monad Future where
 
 export
 performFutureIO : HasIO io => Future (IO a) -> io (Future a)

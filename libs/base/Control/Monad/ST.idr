@@ -23,16 +23,22 @@ Functor (ST s) where
   map fn (MkST st) = MkST $ fn <$> st
 
 export
-Applicative (ST s) where
-  pure = MkST . pure
+Apply (ST s) where
   MkST f <*> MkST a = MkST $ f <*> a
 
 export
-Monad (ST s) where
+Applicative (ST s) where
+  pure = MkST . pure
+
+export
+Bind (ST s) where
   MkST p >>= k
       = MkST $ do p' <- p
                   let MkST kp = k p'
                   kp
+
+export
+Monad (ST s) where
 
 export
 newSTRef : a -> ST s (STRef s a)

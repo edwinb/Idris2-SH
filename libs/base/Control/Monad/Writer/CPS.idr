@@ -83,22 +83,34 @@ Functor m => Functor (WriterT w m) where
   map f m = MkWriterT \w => (\(a,w') => (f a,w')) <$> unWriterT m w
 
 public export %inline
-Monad m => Applicative (WriterT w m) where
-  pure a = MkWriterT \w => pure (a,w)
+Monad m => Apply (WriterT w m) where
   MkWriterT mf <*> MkWriterT mx =
     MkWriterT \w => do (f,w1) <- mf w
                        (a,w2) <- mx w1
                        pure (f a,w2)
 
 public export %inline
-(Monad m, Alternative m) => Alternative (WriterT w m) where
-  empty = MkWriterT \_ => empty
+Monad m => Applicative (WriterT w m) where
+  pure a = MkWriterT \w => pure (a,w)
+
+public export %inline
+(Monad m, Alt m) => Alt (WriterT w m) where
   MkWriterT m <|> MkWriterT n = MkWriterT \w => m w <|> n w
 
 public export %inline
-Monad m => Monad (WriterT w m) where
+(Monad m, Plus m) => Plus (WriterT w m) where
+  empty = MkWriterT \_ => empty
+
+public export %inline
+(Monad m, Plus m) => Alternative (WriterT w m) where
+
+public export %inline
+Monad m => Bind (WriterT w m) where
   m >>= k = MkWriterT \w => do (a,w1) <- unWriterT m w
                                unWriterT (k a) w1
+
+public export %inline
+Monad m => Monad (WriterT w m) where
 
 public export %inline
 MonadTrans (WriterT w) where

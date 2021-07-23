@@ -72,9 +72,7 @@ implementation Functor f => Functor (StateT stateType f) where
     map f (ST g) = ST (\st => map (map f) (g st)) where
 
 public export
-implementation Monad f => Applicative (StateT stateType f) where
-    pure x = ST (\st => pure (st, x))
-
+implementation Monad f => Apply (StateT stateType f) where
     (ST f) <*> (ST a)
         = ST (\st =>
                 do (r, g) <- f st
@@ -82,12 +80,19 @@ implementation Monad f => Applicative (StateT stateType f) where
                    pure (t, g b))
 
 public export
-implementation Monad m => Monad (StateT stateType m) where
+implementation Monad f => Applicative (StateT stateType f) where
+    pure x = ST (\st => pure (st, x))
+
+public export
+implementation Monad m => Bind (StateT stateType m) where
     (ST f) >>= k
         = ST (\st =>
                 do (st', v) <- f st
                    let ST kv = k v
                    kv st')
+
+public export
+implementation Monad m => Monad (StateT stateType m) where
 
 public export
 implementation MonadTrans (StateT stateType) where
@@ -97,9 +102,15 @@ implementation MonadTrans (StateT stateType) where
                    pure (st, r))
 
 public export
-implementation (Monad f, Alternative f) => Alternative (StateT st f) where
-    empty = lift empty
+implementation Monad f => Alt f => Alt (StateT st f) where
     (ST f) <|> (ST g) = ST (\st => f st <|> g st)
+
+public export
+implementation (Monad f, Plus f) => Plus (StateT st f) where
+    empty = lift empty
+
+public export
+implementation (Monad f, Plus f) => Alternative (StateT st f) where
 
 public export
 implementation HasIO m => HasIO (StateT stateType m) where

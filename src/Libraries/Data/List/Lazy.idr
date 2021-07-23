@@ -42,20 +42,6 @@ Functor LazyList where
   map f [] = []
   map f (x :: xs) = f x :: map f xs
 
-public export
-Applicative LazyList where
-  pure x = [x]
-  fs <*> vs = concatMap (\f => map f vs) fs
-
-public export
-Alternative LazyList where
-  empty = []
-  xs <|> ys = xs ++ ys
-
-public export
-Monad LazyList where
-  m >>= f = concatMap f m
-
 -- There is no Traversable instance for lazy lists.
 -- The result of a traversal will be a non-lazy list in general
 -- (you can't delay the "effect" of an applicative functor).

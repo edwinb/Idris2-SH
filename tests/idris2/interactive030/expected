@@ -20,12 +20,7 @@ Main> Prelude.<$> : Functor f => (a -> b) -> f a -> f b
   Fixity Declaration: infixr operator, level 4
 Main> Prelude.Monad : (Type -> Type) -> Type
   Parameters: m
-  Constraints: Applicative m
-  Methods:
-    (>>=) : m a -> (a -> m b) -> m b
-      Also called `bind`.
-    join : m (m a) -> m a
-      Also called `flatten` or mu.
+  Constraints: Applicative m, Bind m
   Implementations:
     Monad IO
     Monoid a => Monad (Pair a)
@@ -35,11 +30,11 @@ Main> Prelude.Monad : (Type -> Type) -> Type
 Main> Prelude.div : Integral ty => ty -> ty -> ty
   Totality: total
   Fixity Declaration: infixl operator, level 9
-Main> Prelude.>>= : Monad m => m a -> (a -> m b) -> m b
+Main> Prelude.>>= : Bind m => m a -> (a -> m b) -> m b
   Also called `bind`.
   Totality: total
   Fixity Declaration: infixl operator, level 1
-Main> Prelude.>> : Monad m => m () -> Lazy (m b) -> m b
+Main> Prelude.>> : Bind m => m () -> Lazy (m b) -> m b
   Sequencing of effectful composition
   Totality: total
   Fixity Declaration: infixl operator, level 1

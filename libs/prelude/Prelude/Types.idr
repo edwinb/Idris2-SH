@@ -132,14 +132,22 @@ Functor (Pair a) where
 
 %inline
 public export
-Monoid a => Applicative (Pair a) where
-  pure = (neutral,)
+Semigroup a => Apply (Pair a) where
   (a1,f) <*> (a2,v) = (a1 <+> a2, f v)
 
 %inline
 public export
-Monoid a => Monad (Pair a) where
+Monoid a => Applicative (Pair a) where
+  pure = (neutral,)
+
+%inline
+public export
+Monoid a => Bind (Pair a) where
   (a1,a) >>= f = let (a2,b) = f a in (a1 <+> a2, b)
+
+%inline
+public export
+Monoid a => Monad (Pair a) where
 
 -----------
 -- MAYBE --
@@ -203,23 +211,33 @@ Functor Maybe where
   map f Nothing  = Nothing
 
 public export
-Applicative Maybe where
-  pure = Just
-
+Apply Maybe where
   Just f <*> Just a = Just (f a)
   _      <*> _      = Nothing
 
 public export
-Alternative Maybe where
-  empty = Nothing
+Applicative Maybe where
+  pure = Just
 
+public export
+Alt Maybe where
   (Just x) <|> _ = Just x
   Nothing  <|> v = v
 
 public export
-Monad Maybe where
+Plus Maybe where
+  empty = Nothing
+
+public export
+Alternative Maybe where
+
+public export
+Bind Maybe where
   Nothing  >>= k = Nothing
   (Just x) >>= k = k x
+
+public export
+Monad Maybe where
 
 public export
 Foldable Maybe where
@@ -330,17 +348,28 @@ Bitraversable Either where
 
 %inline
 public export
-Applicative (Either e) where
-  pure = Right
-
+Apply (Either e) where
   (Left a) <*> _          = Left a
   (Right f) <*> (Right r) = Right (f r)
   (Right _) <*> (Left l)  = Left l
 
+%inline
 public export
-Monad (Either e) where
+Applicative (Either e) where
+  pure = Right
+
+public export
+Bind (Either e) where
   (Left n) >>= _ = Left n
   (Right r) >>= f = f r
+
+public export
+Monad (Either e) where
+
+public export
+Alt (Either e) where
+  (Right x) <|> _ = Right x
+  (Left _)  <|> v = v
 
 public export
 Foldable (Either e) where
@@ -414,18 +443,30 @@ Foldable List where
   foldMap f = foldl (\acc, elem => acc <+> f elem) neutral
 
 public export
-Applicative List where
-  pure x = [x]
+Apply List where
   fs <*> vs = concatMap (\f => map f vs) fs
 
 public export
-Alternative List where
-  empty = []
+Applicative List where
+  pure x = [x]
+
+public export
+Alt List where
   xs <|> ys = xs ++ ys
 
 public export
-Monad List where
+Plus List where
+  empty = []
+
+public export
+Alternative List where
+
+public export
+Bind List where
   m >>= f = concatMap f m
+
+public export
+Monad List where
 
 public export
 Traversable List where

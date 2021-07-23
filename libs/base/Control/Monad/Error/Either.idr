@@ -117,25 +117,37 @@ Traversable m => Traversable (EitherT e m) where
     = MkEitherT <$> traverse (either (pure . Left) (map Right . f)) x
 
 public export
+Apply m => Apply (EitherT e m) where
+  f <*> x = MkEitherT $ (<*>) <$> runEitherT f <*> runEitherT x
+
+public export
 Applicative m => Applicative (EitherT e m) where
   pure = MkEitherT . pure . Right
-  f <*> x = MkEitherT [| runEitherT f <*> runEitherT x |]
+
+public export
+Monad m => Bind (EitherT e m) where
+  x >>= k = MkEitherT $ runEitherT x >>= either (pure . Left) (runEitherT . k)
 
 public export
 Monad m => Monad (EitherT e m) where
-  x >>= k = MkEitherT $ runEitherT x >>= either (pure . Left) (runEitherT . k)
 
-||| Alternative instance that collects left results, allowing you to try
-||| multiple possibilities and combine failures.
 public export
-(Monad m, Monoid e) => Alternative (EitherT e m) where
-  empty = left neutral
+(Monad m, Semigroup e) => Alt (EitherT e m) where
   MkEitherT x <|> MkEitherT y = MkEitherT $ do
     Left l <- x
       | Right r => pure (Right r)
     Left l' <- y
       | Right r => pure (Right r)
     pure (Left (l <+> l'))
+
+||| Plus instance that collects left results, allowing you to try
+||| multiple possibilities and combine failures.
+public export
+(Monad m, Monoid e) => Plus (EitherT e m) where
+  empty = left neutral
+
+public export
+(Monad m, Monoid e) => Alternative (EitherT e m) where
 
 public export
 MonadTrans (EitherT e) where

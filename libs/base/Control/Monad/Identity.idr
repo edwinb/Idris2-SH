@@ -14,13 +14,19 @@ Functor Identity where
     map fn (Id a) = Id (fn a)
 
 public export
-Applicative Identity where
-    pure x = Id x
+Apply Identity where
     (Id f) <*> (Id g) = Id (f g)
 
 public export
-Monad Identity where
+Applicative Identity where
+    pure x = Id x
+
+public export
+Bind Identity where
     (Id x) >>= k = k x
+
+public export
+Monad Identity where
 
 public export
 Show a => Show (Identity a) where

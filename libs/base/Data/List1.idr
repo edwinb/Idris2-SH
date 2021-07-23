@@ -123,13 +123,23 @@ Functor List1 where
   map f (x ::: xs) = f x ::: map f xs
 
 public export
+Apply List1 where
+  f ::: fs <*> xs = appendl (map f xs) (fs <*> forget xs)
+
+public export
 Applicative List1 where
   pure x = singleton x
-  f ::: fs <*> xs = appendl (map f xs) (fs <*> forget xs)
+
+export
+Bind List1 where
+  (x ::: xs) >>= f = appendl (f x) (xs >>= forget . f)
 
 export
 Monad List1 where
-  (x ::: xs) >>= f = appendl (f x) (xs >>= forget . f)
+
+public export
+Alt List1 where
+  a <|> b = a ++ b
 
 export
 Foldable List1 where
@@ -140,8 +150,18 @@ Foldable List1 where
   foldMap f (x ::: xs) = f x <+> foldMap f xs
 
 export
+Foldable1 List1 where
+  foldMap1 f (x ::: xs) = foldl (\a,e => a <+> f e) (f x) xs
+
+export
 Traversable List1 where
   traverse f (x ::: xs) = [| f x ::: traverse f xs |]
+
+export
+Traversable1 List1 where
+  traverse1 f (x ::: []) = (::: []) <$> f x
+  traverse1 f l@(x ::: (h :: t)) =
+    cons <$> f x <*> traverse1 f (assert_smaller l (h ::: t))
 
 export
 Show a => Show (List1 a) where

@@ -45,9 +45,7 @@ implementation Functor f => Functor (ReaderT stateType f) where
   map f (MkReaderT g) = MkReaderT (\st => map f (g st))
 
 public export
-implementation Applicative f => Applicative (ReaderT stateType f) where
-  pure x = MkReaderT (\st => pure x)
-
+implementation Apply f => Apply (ReaderT stateType f) where
   (MkReaderT f) <*> (MkReaderT a) =
     MkReaderT (\st =>
       let f' = f st in
@@ -55,11 +53,18 @@ implementation Applicative f => Applicative (ReaderT stateType f) where
       f' <*> a')
 
 public export
-implementation Monad m => Monad (ReaderT stateType m) where
+implementation Applicative f => Applicative (ReaderT stateType f) where
+  pure x = MkReaderT (\st => pure x)
+
+public export
+implementation Bind m => Bind (ReaderT stateType m) where
   (MkReaderT f) >>= k =
     MkReaderT (\st => do v <- f st
                          let MkReaderT kv = k v
                          kv st)
+
+public export
+implementation Monad m => Monad (ReaderT stateType m) where
 
 public export
 implementation MonadTrans (ReaderT stateType) where
@@ -70,7 +75,12 @@ implementation HasIO m => HasIO (ReaderT stateType m) where
   liftIO f = MkReaderT (\_ => liftIO f)
 
 public export
-implementation (Monad f, Alternative f) => Alternative (ReaderT stateType f) where
+implementation Alt f => Alt (ReaderT stateType f) where
+  (MkReaderT f) <|> (MkReaderT g) = MkReaderT (\st => f st <|> g st)
+
+public export
+implementation (Monad f, Plus f) => Plus (ReaderT stateType f) where
   empty = lift empty
 
-  (MkReaderT f) <|> (MkReaderT g) = MkReaderT (\st => f st <|> g st)
+public export
+implementation (Monad f, Plus f) => Alternative (ReaderT stateType f) where

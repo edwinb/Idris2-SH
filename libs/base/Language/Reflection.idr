@@ -52,13 +52,19 @@ Functor Elab where
   map f e = Bind e $ Pure . f
 
 export
-Applicative Elab where
-  pure = Pure
+Apply Elab where
   f <*> a = Bind f (<$> a)
 
 export
-Monad Elab where
+Applicative Elab where
+  pure = Pure
+
+export
+Bind Elab where
   (>>=) = Bind
+
+export
+Monad Elab where
 
 ||| Report an error in elaboration
 export

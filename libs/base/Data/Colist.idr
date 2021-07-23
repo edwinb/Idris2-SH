@@ -243,12 +243,14 @@ Functor Colist where
   map f (x :: xs) = f x :: map f xs
 
 public export
-Applicative Colist where
-  pure = repeat
-
+Apply Colist where
   [] <*> _  = []
   _  <*> [] = []
   f :: fs <*> a :: as = f a :: (fs <*> as)
+
+public export
+Applicative Colist where
+  pure = repeat
 
 public export
 Zippable Colist where

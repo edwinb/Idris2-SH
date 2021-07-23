@@ -94,16 +94,22 @@ Functor io => Functor (L io) where
   map fn act = Bind act \a' => PureW (fn a')
 
 export
-Applicative io => Applicative (L io) where
-  pure = PureW
+Apply io => Apply (L io) where
   (<*>) f a
       = f `Bind` \f' =>
         a `Bind` \a' =>
         PureW (f' a')
 
 export
-(Applicative m, LinearBind m) => Monad (L m) where
+Applicative io => Applicative (L io) where
+  pure = PureW
+
+export
+(Applicative m, LinearBind m) => Bind (L m) where
   (>>=) a k = Bind a k
+
+export
+(Applicative m, LinearBind m) => Monad (L m) where
 
 -- prioritise this one for concrete LIO, so we get the most useful
 -- linearity annotations.

@@ -66,15 +66,21 @@ Functor m => Functor (ValidatorT m a) where
     map f v = MkValidator (map f . validateT v)
 
 export
-Monad m => Applicative (ValidatorT m a) where
-    pure a = MkValidator (const $ pure a)
+Monad m => Apply (ValidatorT m a) where
     f <*> a = MkValidator (\x => validateT f x <*> validateT a x)
 
 export
-Monad m => Monad (ValidatorT m a) where
+Monad m => Applicative (ValidatorT m a) where
+    pure a = MkValidator (const $ pure a)
+
+export
+Monad m => Bind (ValidatorT m a) where
     v >>= f = MkValidator $ \x => do
         r <- validateT v x
         validateT (f r) x
+
+export
+Monad m => Monad (ValidatorT m a) where
 
 ||| Plug a property validator into the chain of other validators. The value
 ||| under validation will be ignored and the value whose property is going to
@@ -103,7 +109,7 @@ export
 (>>>) : Monad m => ValidatorT m a b -> ValidatorT m b c -> ValidatorT m a c
 left >>> right = MkValidator (validateT left >=> validateT right)
 
-Monad m => Alternative (ValidatorT m a) where
+Monad m => Alt (ValidatorT m a) where
     left <|> right = MkValidator \x => MkEitherT $ do
         case !(runEitherT $ validateT left x) of
             (Right r) => pure $ Right r
@@ -111,7 +117,10 @@ Monad m => Alternative (ValidatorT m a) where
                 (Right r) => pure $ Right r
                 (Left e') => pure $ Left (e <+> " / " <+> e')
 
+Monad m => Plus (ValidatorT m a) where
     empty = MkValidator \x => MkEitherT $ pure (Left "invalid")
+
+Monad m => Alternative (ValidatorT m a) where
 
 ||| Alter the input before validation using given function.
 export

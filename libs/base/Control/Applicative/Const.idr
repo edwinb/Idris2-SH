@@ -85,9 +85,12 @@ Contravariant (Const a) where
   contramap _ (MkConst v) = MkConst v
 
 public export
+Semigroup a => Apply (Const a) where
+  MkConst x <*> MkConst y = MkConst (x <+> y)
+
+public export
 Monoid a => Applicative (Const a) where
   pure _ = MkConst neutral
-  MkConst x <*> MkConst y = MkConst (x <+> y)
 
 public export
 Foldable (Const a) where

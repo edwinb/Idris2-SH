@@ -372,6 +372,10 @@ implementation Foldable (Vect n) where
 
   foldMap f = foldl (\acc, elem => acc <+> f elem) neutral
 
+public export
+implementation Foldable1 (Vect $ S n) where
+  foldMap1 f (h :: t) = foldl (\acc, elem => acc <+> f elem) (f h) t
+
 --------------------------------------------------------------------------------
 -- Special folds
 --------------------------------------------------------------------------------
@@ -852,19 +856,30 @@ transpose (x :: xs) = zipWith (::) x (transpose xs) -- = [| x :: xs |]
 -- These only work if the length is known at run time!
 
 public export
+implementation Apply (Vect k) where
+    fs <*> vs = zipWith apply fs vs
+
+public export
+implementation Bind (Vect k) where
+    m >>= f = diag (map f m)
+
+public export
 implementation {k : Nat} -> Applicative (Vect k) where
     pure = replicate _
-    fs <*> vs = zipWith apply fs vs
 
 -- ||| This monad is different from the List monad, (>>=)
 -- ||| uses the diagonal.
 implementation {k : Nat} -> Monad (Vect k) where
-    m >>= f = diag (map f m)
 
 public export
 implementation Traversable (Vect k) where
     traverse f []        = pure []
     traverse f (x :: xs) = [| f x :: traverse f xs |]
+
+public export
+implementation Traversable1 (Vect $ S k) where
+    traverse1 f (x :: [])         = (:: []) <$> f x
+    traverse1 f (x :: v@(_ :: _)) = (::) <$> f x <*> traverse1 f v
 
 --------------------------------------------------------------------------------
 -- Show

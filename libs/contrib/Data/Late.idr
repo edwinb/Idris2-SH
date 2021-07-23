@@ -72,10 +72,16 @@ Functor Late where
   map f d = bind d (Now . f)
 
 public export
-Applicative Late where
-  pure = Now
+Apply Late where
   df <*> dx = bind df (\ f => map (f $) dx)
 
 public export
-Monad Late where
+Applicative Late where
+  pure = Now
+
+public export
+Bind Late where
   (>>=) = bind
+
+public export
+Monad Late where

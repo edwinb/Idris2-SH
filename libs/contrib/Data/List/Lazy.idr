@@ -32,11 +32,11 @@ bindLazy : (a -> LazyList b) -> LazyList a -> LazyList b
 bindLazy f = foldrLazy ((++) . f) []
 
 public export
-choice : Alternative f => LazyList (f a) -> f a
+choice : Plus f => LazyList (f a) -> f a
 choice = foldrLazy (<|>) empty
 
 public export
-choiceMap : Alternative f => (a -> f b) -> LazyList a -> f b
+choiceMap : Plus f => (a -> f b) -> LazyList a -> f b
 choiceMap g = foldrLazy ((<|>) . g) empty
 
 public export
@@ -107,18 +107,30 @@ Functor LazyList where
   map f (x :: xs) = f x :: map f xs
 
 public export
-Applicative LazyList where
-  pure x = [x]
+Apply LazyList where
   fs <*> vs = bindLazy (\f => map f vs) fs
 
 public export
-Alternative LazyList where
-  empty = []
+Applicative LazyList where
+  pure x = [x]
+
+public export
+Alt LazyList where
   (<|>) = (++)
 
 public export
-Monad LazyList where
+Plus LazyList where
+  empty = []
+
+public export
+Alternative LazyList where
+
+public export
+Bind LazyList where
   m >>= f = bindLazy f m
+
+public export
+Monad LazyList where
 
 -- There is no Traversable instance for lazy lists.
 -- The result of a traversal will be a non-lazy list in general

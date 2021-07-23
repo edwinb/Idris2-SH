@@ -118,19 +118,33 @@ Traversable m => Traversable (MaybeT m) where
     = MkMaybeT <$> traverse (maybe (pure Nothing) (map Just . f)) x
 
 public export
+Apply m => Apply (MaybeT m) where
+  MkMaybeT f <*> MkMaybeT x = MkMaybeT $ (<*>) <$> f <*> x
+
+public export
 Applicative m => Applicative (MaybeT m) where
   pure = just
-  MkMaybeT f <*> MkMaybeT x = MkMaybeT [| f <*> x |]
+
+public export
+Monad m => Bind (MaybeT m) where
+  MkMaybeT x >>= k = MkMaybeT $ x >>= maybe (pure Nothing) (runMaybeT . k)
 
 public export
 Monad m => Monad (MaybeT m) where
-  MkMaybeT x >>= k = MkMaybeT $ x >>= maybe (pure Nothing) (runMaybeT . k)
+
+||| See note about Monad prerequisite on Semigroup instance.
+public export
+Monad m => Alt (MaybeT m) where
+  a <|> b = a <+> b
+
+||| See note about Monad prerequisite on Semigroup instance.
+public export
+Monad m => Plus (MaybeT m) where
+  empty = nothing
 
 ||| See note about Monad prerequisite on Semigroup instance.
 public export
 Monad m => Alternative (MaybeT m) where
-  empty = nothing
-  a <|> b = a <+> b
 
 public export
 MonadTrans MaybeT where

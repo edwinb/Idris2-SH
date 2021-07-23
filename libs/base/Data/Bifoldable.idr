@@ -103,13 +103,13 @@ bifor_ :  (Bifoldable p, Applicative f)
        -> f ()
 bifor_ p f g = bitraverse_ f g p
 
-||| Bifold using Alternative.
+||| Bifold using Plus.
 |||
 ||| If you have a left-biased alternative operator `<|>`, then `choice` performs
 ||| left-biased choice from a list of alternatives, which means that it
 ||| evaluates to the left-most non-`empty` alternative.
 public export
-bichoice : (Bifoldable p, Alternative f) => p (Lazy (f a)) (Lazy (f a)) -> f a
+bichoice : (Bifoldable p, Plus f) => p (Lazy (f a)) (Lazy (f a)) -> f a
 bichoice t = bifoldr {a = Lazy (f a)} {b = Lazy (f a)} {acc = Lazy (f a)}
                  (\ x, xs => x <|> xs)
                  (\ x, xs => x <|> xs)
@@ -118,7 +118,7 @@ bichoice t = bifoldr {a = Lazy (f a)} {b = Lazy (f a)} {acc = Lazy (f a)}
 
 ||| A fused version of `bichoice` and `bimap`.
 public export
-bichoiceMap : (Bifoldable p, Alternative f)
+bichoiceMap : (Bifoldable p, Plus f)
             => (a -> f x)
             -> (b -> f x)
             -> p a b ->

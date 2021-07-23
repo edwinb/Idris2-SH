@@ -113,14 +113,20 @@ implementation Arrow a => Functor (ArrowMonad a) where
   map f (MkArrowMonad m) = MkArrowMonad $ m >>> arrow f
 
 public export
-implementation Arrow a => Applicative (ArrowMonad a) where
-  pure x = MkArrowMonad $ arrow $ \_ => x
+implementation Arrow a => Apply (ArrowMonad a) where
   (MkArrowMonad f) <*> (MkArrowMonad x) = MkArrowMonad $ f &&& x >>> arrow (uncurry id)
 
 public export
-implementation ArrowApply a => Monad (ArrowMonad a) where
+implementation Arrow a => Applicative (ArrowMonad a) where
+  pure x = MkArrowMonad $ arrow $ \_ => x
+
+public export
+implementation ArrowApply a => Bind (ArrowMonad a) where
   (MkArrowMonad m) >>= f =
     MkArrowMonad $ m >>> (arrow $ \x => (runArrowMonad (f x), ())) >>> app
+
+public export
+implementation ArrowApply a => Monad (ArrowMonad a) where
 
 public export
 interface Arrow arr => ArrowLoop (0 arr : Type -> Type -> Type) where

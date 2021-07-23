@@ -185,10 +185,12 @@ Functor Colist1 where
   map f (x ::: xs) = f x ::: map f xs
 
 public export
+Apply Colist1 where
+  (f ::: fs) <*> (a ::: as) = f a ::: (fs <*> as)
+
+public export
 Applicative Colist1 where
   pure = repeat
-
-  (f ::: fs) <*> (a ::: as) = f a ::: (fs <*> as)
 
 public export
 Zippable Colist1 where

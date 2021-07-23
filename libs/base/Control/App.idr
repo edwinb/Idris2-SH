@@ -186,14 +186,20 @@ Functor (App {l} es) where
   map f ap = bindApp ap $ \ap' => pureApp (f ap')
 
 export
+Apply (App {l} es) where
+  (<*>) f a = bindApp f $ \f' =>
+              bindApp a $ \a' => pureApp (f' a')
+
+export
 Applicative (App {l} es) where
   pure = pureApp
-  (<*>) f a = bindApp f $ \f' =>
-              bindApp a $ \a' => pure (f' a')
+
+export
+Bind (App es) where
+  (>>=) = bindApp -- won't get used, but handy to have the instance
 
 export
 Monad (App es) where
-  (>>=) = bindApp -- won't get used, but handy to have the instance
 
 export
 (>>=) : SafeBind l l' =>

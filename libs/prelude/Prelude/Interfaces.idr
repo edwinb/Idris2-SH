@@ -63,7 +63,7 @@ Monoid b => Monoid (a -> b) where
   neutral _ = neutral
 
 ---------------------------------------------------------
--- FUNCTOR, BIFUNCTOR, APPLICATIVE, ALTERNATIVE, MONAD --
+-- FUNCTOR, APPLY, APPLICATIVE, MONAD
 ---------------------------------------------------------
 
 ||| Functors allow a uniform action over a parameterised type.
@@ -114,113 +114,52 @@ namespace Functor
   [Compose] (Functor f, Functor g) => Functor (f . g) where
     map = map . map
 
-||| Bifunctors
-||| @f The action of the Bifunctor on pairs of objects
+||| An applicative functor without `pure`.
+|||
+||| This allows us to get access to `(<*>)` and
+||| possibly `(>>=)` for data types, for which we cannot
+||| define `pure`, such as sorted maps or vectors
+||| (fixed length lists). In case of vectors, it is possible
+||| to implement `pure`, but only if we have access to the
+||| vector's length (see the implementations of
+||| `Apply` and `Applicative` for `Data.Vect` in base).
+|||
+||| In the case of `Pair`, we can get `(<*>)` and
+||| `(>>=)` for pairs whose first value is a `Semigroup`, while
+||| for `pure` we'd need a `Monoid`.
 public export
-interface Bifunctor f where
-  constructor MkBifunctor
-  ||| The action of the Bifunctor on pairs of morphisms
-  |||
-  ||| ````idris example
-  ||| bimap (\x => x + 1) reverse (1, "hello") == (2, "olleh")
-  ||| ````
-  |||
-  bimap : (a -> c) -> (b -> d) -> f a b -> f c d
-  bimap f g = mapFst f . mapSnd g
-
-  ||| The action of the Bifunctor on morphisms pertaining to the first object
-  |||
-  ||| ````idris example
-  ||| mapFst (\x => x + 1) (1, "hello") == (2, "hello")
-  ||| ````
-  |||
-  mapFst : (a -> c) -> f a b -> f c b
-  mapFst f = bimap f id
-
-  ||| The action of the Bifunctor on morphisms pertaining to the second object
-  |||
-  ||| ````idris example
-  ||| mapSnd reverse (1, "hello") == (1, "olleh")
-  ||| ````
-  |||
-  mapSnd : (b -> d) -> f a b -> f a d
-  mapSnd = bimap id
-
-public export
-mapHom : Bifunctor f => (a -> b) -> f a a -> f b b
-mapHom f = bimap f f
-
-public export
-interface Functor f => Applicative f where
-  constructor MkApplicative
-  pure : a -> f a
+interface Functor f => Apply f where
+  constructor MkApply
   (<*>) : f (a -> b) -> f a -> f b
 
 public export
-(<*) : Applicative f => f a -> f b -> f a
+(<*) : Apply f => f a -> f b -> f a
 a <* b = map const a <*> b
 
 public export
-(*>) : Applicative f => f a -> f b -> f b
+(*>) : Apply f => f a -> f b -> f b
 a *> b = map (const id) a <*> b
 
-%allow_overloads pure
 %allow_overloads (<*)
 %allow_overloads (*>)
 
-namespace Applicative
+namespace Apply
   ||| Composition of applicative functors is an applicative functor.
   public export
-  [Compose] (Applicative f, Applicative g) => Applicative (f . g)
+  [Compose] (Apply f, Apply g) => Apply (f . g)
     using Functor.Compose where
-      pure = pure . pure
-      fun <*> x = [| fun <*> x |]
+      fun <*> x = (<*>) <$> fun <*> x
 
 public export
-interface Applicative f => Alternative f where
-  constructor MkAlternative
-  empty : f a
-  (<|>) : f a -> Lazy (f a) -> f a
+[SemigroupApply] Apply f => Semigroup a => Semigroup (f a) where
+  x <+> y = (<+>) <$> x <*> y
 
 public export
-interface Applicative m => Monad m where
-  constructor MkMonad
-  ||| Also called `bind`.
-  (>>=) : m a -> (a -> m b) -> m b
+interface Apply f => Applicative f where
+  constructor MkApplicative
+  pure : a -> f a
 
-  ||| Also called `flatten` or mu.
-  join : m (m a) -> m a
-
-  -- default implementations
-  (>>=) x f = join (f <$> x)
-  join x = x >>= id
-
-%allow_overloads (>>=)
-
-||| Right-to-left monadic bind, flipped version of `>>=`.
-public export
-(=<<) : Monad m => (a -> m b) -> m a -> m b
-(=<<) = flip (>>=)
-
-||| Sequencing of effectful composition
-public export
-(>>) : Monad m => m () -> Lazy (m b) -> m b
-a >> b = a >>= \_ => b
-
-||| Left-to-right Kleisli composition of monads.
-public export
-(>=>) : Monad m => (a -> m b) -> (b -> m c) -> (a -> m c)
-(>=>) f g = \x => f x >>= g
-
-||| Right-to-left Kleisli composition of monads, flipped version of `>=>`.
-public export
-(<=<) : Monad m => (b -> m c) -> (a -> m b) -> (a -> m c)
-(<=<) = flip (>=>)
-
-||| `guard a` is `pure ()` if `a` is `True` and `empty` if `a` is `False`.
-public export
-guard : Alternative f => Bool -> f ()
-guard x = if x then pure () else empty
+%allow_overloads pure
 
 ||| Conditionally execute an applicative expression when the boolean is true.
 public export
@@ -233,9 +172,135 @@ when False f = pure ()
 unless : Applicative f => Bool -> Lazy (f ()) -> f ()
 unless = when . not
 
----------------------------
--- FOLDABLE, TRAVERSABLE --
----------------------------
+namespace Applicative
+  ||| Composition of applicative functors is an applicative functor.
+  public export
+  [Compose] (Applicative f, Applicative g) => Applicative (f . g)
+    using Apply.Compose where
+      pure = pure . pure
+
+public export
+[MonoidApplicative] Applicative f => Monoid a => Monoid (f a) using Interfaces.SemigroupApply where
+  neutral = pure neutral
+
+public export
+interface Apply m => Bind m where
+  constructor MkBind
+  ||| Also called `bind`.
+  (>>=) : m a -> (a -> m b) -> m b
+
+  ||| Also called `flatten` or mu.
+  join : m (m a) -> m a
+
+  -- default implementations
+  (>>=) x f = join (f <$> x)
+  join x = x >>= id
+
+public export
+interface Applicative m => Bind m => Monad m where
+  constructor MkMonad
+
+%allow_overloads (>>=)
+
+||| Right-to-left monadic bind, flipped version of `>>=`.
+public export
+(=<<) : Bind m => (a -> m b) -> m a -> m b
+(=<<) = flip (>>=)
+
+||| Sequencing of effectful composition
+public export
+(>>) : Bind m => m () -> Lazy (m b) -> m b
+a >> b = a >>= \_ => b
+
+||| Left-to-right Kleisli composition of monads.
+public export
+(>=>) : Bind m => (a -> m b) -> (b -> m c) -> (a -> m c)
+(>=>) f g = \x => f x >>= g
+
+||| Right-to-left Kleisli composition of monads, flipped version of `>=>`.
+public export
+(<=<) : Bind m => (b -> m c) -> (a -> m b) -> (a -> m c)
+(<=<) = flip (>=>)
+
+---------------------------------------------------------
+-- ALT, PLUS, ALTERNATIVE
+---------------------------------------------------------
+
+||| The Alt interface identifies an associative
+||| operation on a type constructor. It is similar to Semigroup,
+||| except that it applies to types of kind `Type -> Type`,
+||| like `Maybe` or `List`.
+|||
+||| `Alt` implementations are required to satisfy the following laws:
+|||
+|||     Associativity: `(x <|> y) <|> z = x <|> (y <|> z)`
+|||     Distributivity: `f <$> (x <|> y) = (f <$> x) <|> (f <$> y)`
+|||
+||| A common use case is to select the first "valid" item, or,
+||| if all items are "invalid", the last "invalid" item
+||| (see the `Alt` implementation for `Either e` for this
+||| behavior).
+public export
+interface Functor f => Alt f where
+  constructor MkAlt
+  (<|>) : f a -> Lazy (f a) -> f a
+
+||| The Plus interface class extends Alt with a value that should
+||| be the left and right identity for `(<|>)`.
+|||
+||| It is similar to `Monoid`, except that it applies to types
+||| of kind `Type -> Type`, like `Maybe` or `List`.
+|||
+||| `Plus` implementations should satisfy the following laws:
+|||
+|||     Left identity: `empty <|> x = x`
+|||     Right identity: `x <|> empty = x`
+|||     Annihilation: `f <$> empty = empty`
+|||
+public export
+interface Alt f => Plus f where
+  constructor MkPlus
+  empty : f a
+
+||| The Alternative interface has no members of its own;
+||| it just specifies that the type constructor has both
+||| `Applicative` and `Plus` implementations.
+|||
+||| Types which have `Alternative` implementations
+||| should also satisfy the following laws:
+|||
+|||     Distributivity: `(f <|> g) <*> x = (f <*> x) <|> (g <*> x)`
+|||     Annihilation: `empty <*> f = empty`
+|||
+public export
+interface Plus f => Applicative f => Alternative f where
+  constructor MkAlternative
+
+||| `guard a` is `pure ()` if `a` is `True` and `empty` if `a` is `False`.
+public export
+guard : Alternative f => Bool -> f ()
+guard x = if x then pure () else empty
+
+namespace Lazy
+  public export
+  [SemigroupAlt] Alt f => Semigroup (Lazy (f a)) where
+    x <+> y = force x <|> y
+
+  public export
+  [MonoidPlus] Plus f => Monoid (Lazy (f a)) using Lazy.SemigroupAlt where
+    neutral = delay empty
+
+public export
+[SemigroupAlt] Alt f => Semigroup (f a) where
+  x <+> y = x <|> delay y
+
+public export
+[MonoidPlus] Plus f => Monoid (f a) using Interfaces.SemigroupAlt where
+  neutral = empty
+
+---------------------------------------------------------
+-- FOLDABLE, FOLDABLE1, TRAVERSABLE, TRAVERSABLE1
+---------------------------------------------------------
 
 ||| The `Foldable` interface describes how you can iterate over the elements in
 ||| a parameterised type and combine the elements together, using a provided
@@ -416,24 +481,16 @@ public export
 for_ : (Foldable t, Applicative f) => t a -> (a -> f b) -> f ()
 for_ = flip traverse_
 
-namespace Lazy
+namespace Foldable
+  ||| Composition of foldables is foldable.
   public export
-  [SemigroupAlternative] Alternative f => Semigroup (Lazy (f a)) where
-    x <+> y = force x <|> y
+  [Compose] (Foldable t, Foldable f) => Foldable (t . f) where
+    foldr = foldr . flip . foldr
+    foldl = foldl . foldl
+    null tf = null tf || all (force . null) tf
+    foldMap = foldMap . foldMap
 
-  public export
-  [MonoidAlternative] Alternative f => Monoid (Lazy (f a)) using Lazy.SemigroupAlternative where
-    neutral = delay empty
-
-public export
-[SemigroupAlternative] Alternative f => Semigroup (f a) where
-  x <+> y = x <|> delay y
-
-public export
-[MonoidAlternative] Alternative f => Monoid (f a) using Interfaces.SemigroupAlternative where
-  neutral = empty
-
-||| Fold using Alternative.
+||| Fold using Plus.
 |||
 ||| If you have a left-biased alternative operator `<|>`, then `choice` performs
 ||| left-biased choice from a list of alternatives, which means that it
@@ -454,36 +511,34 @@ public export
 |||
 ||| Note: In Haskell, `choice` is called `asum`.
 public export
-choice : (Foldable t, Alternative f) => t (Lazy (f a)) -> f a
-choice = force . concat @{(%search, Lazy.MonoidAlternative)}
+choice : (Foldable t, Plus f) => t (Lazy (f a)) -> f a
+choice = force . concat @{(%search, Lazy.MonoidPlus)}
 
 ||| A fused version of `choice` and `map`.
 public export
-choiceMap : (Foldable t, Alternative f) => (a -> f b) -> t a -> f b
-choiceMap = foldMap @{%search} @{MonoidAlternative}
+choiceMap : (Foldable t, Plus f) => (a -> f b) -> t a -> f b
+choiceMap = foldMap @{%search} @{Interfaces.MonoidPlus}
 
-namespace Foldable
-  ||| Composition of foldables is foldable.
-  public export
-  [Compose] (Foldable t, Foldable f) => Foldable (t . f) where
-    foldr = foldr . flip . foldr
-    foldl = foldl . foldl
-    null tf = null tf || all (force . null) tf
-    foldMap = foldMap . foldMap
-
-||| `Bifoldable` identifies foldable structures with two different varieties
-||| of elements (as opposed to `Foldable`, which has one variety of element).
-||| Common examples are `Either` and `Pair`.
+||| Like `Foldable` but for non-empty data structures.
+|||
+||| In general this means that we only need a `Semigroup` to
+||| accumulate the values stored in a data structure, while in
+||| the case of `Foldable` we need a `Monoid`.
+|||
+||| @ t The type of the 'Foldable' parameterised type.
 public export
-interface Bifoldable p where
-  constructor MkBifoldable
-  bifoldr : (a -> acc -> acc) -> (b -> acc -> acc) -> acc -> p a b -> acc
+interface Foldable t => Foldable1 t where
+  constructor MkFoldable1
+  foldMap1 : Semigroup m => (a -> m) -> t a -> m
 
-  bifoldl : (acc -> a -> acc) -> (acc -> b -> acc) -> acc -> p a b -> acc
-  bifoldl f g z t = bifoldr (flip (.) . flip f) (flip (.) . flip g) id t z
+||| Combine each element of a non-empty structure into a semigroup.
+public export
+concat1 : (Foldable1 t, Semigroup a) => t a -> a
+concat1 = foldMap1 id
 
-  binull : p a b -> Lazy Bool
-  binull = bifoldr {acc = Lazy Bool} (\ _,_ => False) (\ _,_ => False) True
+public export
+choice1 : (Foldable1 t, Alt f) => t (Lazy (f a)) -> f a
+choice1 = force . concat1 @{(%search, Lazy.SemigroupAlt)}
 
 public export
 interface (Functor t, Foldable t) => Traversable t where
@@ -501,6 +556,105 @@ sequence = traverse id
 public export
 for : (Traversable t, Applicative f) => t a -> (a -> f b) -> f (t b)
 for = flip traverse
+
+namespace Traversable
+  ||| Composition of traversables is traversable.
+  public export
+  [Compose] (Traversable t, Traversable f) => Traversable (t . f)
+    using Foldable.Compose Functor.Compose where
+      traverse = traverse . traverse
+
+||| Like `Traversable` but for non-empty data structures.
+||| This allows us to traverse a data structure with
+||| an effect that has only a `Bind` instance, while with
+||| `Traversable` we need an `Applicative` effect.
+public export
+interface (Foldable1 t, Traversable t) => Traversable1 t where
+  constructor MkTraversable1
+  ||| Map each element of a non-empty structure
+  ||| to a computation, evaluate those
+  ||| computations and combine the results.
+  traverse1 : Apply f => (a -> f b) -> t a -> f (t b)
+
+namespace Bind
+  ||| Composition of a traversable bind and bind is a bind.
+  public export
+  [Compose] (Bind m, Bind t, Traversable1 t) => Bind (m . t)
+    using Apply.Compose where
+      a >>= f = a >>= map join . traverse1 f
+
+namespace Monad
+  ||| Composition of a traversable monad and a monad is a monad.
+  public export
+  [ComposeBind] (Monad m, Monad t, Traversable t) => Bind (m . t)
+    using Applicative.Compose where
+      a >>= f = a >>= map join . traverse f
+
+  ||| Composition of a traversable monad and a monad is a monad.
+  public export
+  [Compose] (Monad m, Monad t, Traversable t) => Monad (m . t)
+    using Applicative.Compose Monad.ComposeBind where
+
+---------------------------------------------------------
+-- BIFUNCTOR, BIFOLDABLE, BITRAVERSABLE
+---------------------------------------------------------
+
+||| Bifunctors
+||| @f The action of the Bifunctor on pairs of objects
+public export
+interface Bifunctor f where
+  constructor MkBifunctor
+  ||| The action of the Bifunctor on pairs of morphisms
+  |||
+  ||| ````idris example
+  ||| bimap (\x => x + 1) reverse (1, "hello") == (2, "olleh")
+  ||| ````
+  |||
+  bimap : (a -> c) -> (b -> d) -> f a b -> f c d
+  bimap f g = mapFst f . mapSnd g
+
+  ||| The action of the Bifunctor on morphisms pertaining to the first object
+  |||
+  ||| ````idris example
+  ||| mapFst (\x => x + 1) (1, "hello") == (2, "hello")
+  ||| ````
+  |||
+  mapFst : (a -> c) -> f a b -> f c b
+  mapFst f = bimap f id
+
+  ||| The action of the Bifunctor on morphisms pertaining to the second object
+  |||
+  ||| ````idris example
+  ||| mapSnd reverse (1, "hello") == (1, "olleh")
+  ||| ````
+  |||
+  mapSnd : (b -> d) -> f a b -> f a d
+  mapSnd = bimap id
+
+public export
+mapHom : Bifunctor f => (a -> b) -> f a a -> f b b
+mapHom f = bimap f f
+
+||| `Bifoldable` identifies foldable structures with two different varieties
+||| of elements (as opposed to `Foldable`, which has one variety of element).
+||| Common examples are `Either` and `Pair`.
+public export
+interface Bifoldable p where
+  constructor MkBifoldable
+  bifoldr : (a -> acc -> acc) -> (b -> acc -> acc) -> acc -> p a b -> acc
+
+  bifoldl : (acc -> a -> acc) -> (acc -> b -> acc) -> acc -> p a b -> acc
+  bifoldl f g z t = bifoldr (flip (.) . flip f) (flip (.) . flip g) id t z
+
+  binull : p a b -> Lazy Bool
+  binull = bifoldr {acc = Lazy Bool} (\ _,_ => False) (\ _,_ => False) True
+
+||| `Bifoldable1` identifies non-empty foldable structures with two different varieties
+||| of elements (as opposed to `Foldable1`, which has one variety of element).
+public export
+interface Bifoldable1 p where
+  constructor MkBifoldable1
+  bifoldMap1 : Semigroup m => (a -> m) -> (b -> m) -> p a b -> m
 
 public export
 interface (Bifunctor p, Bifoldable p) => Bitraversable p where
@@ -523,16 +677,9 @@ bifor :  (Bitraversable p, Applicative f)
       -> f (p c d)
 bifor t f g = bitraverse f g t
 
-namespace Traversable
-  ||| Composition of traversables is traversable.
-  public export
-  [Compose] (Traversable t, Traversable f) => Traversable (t . f)
-    using Foldable.Compose Functor.Compose where
-      traverse = traverse . traverse
-
-namespace Monad
-  ||| Composition of a traversable monad and a monad is a monad.
-  public export
-  [Compose] (Monad m, Monad t, Traversable t) => Monad (m . t)
-    using Applicative.Compose where
-      a >>= f = a >>= map join . traverse f
+public export
+interface Bitraversable p => Bifoldable1 p => Bitraversable1 p where
+  constructor MkBitraversable1
+  ||| Map each element of a non-empty structure to a computation, evaluate those
+  ||| computations and combine the results.
+  bitraverse1 : Apply f => (a -> f c) -> (b -> f d) -> p a b -> f (p c d)

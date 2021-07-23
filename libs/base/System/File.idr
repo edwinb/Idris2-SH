@@ -331,8 +331,8 @@ readLinesOnto acc offset (More fuel) h
   = do False <- fEOF h
          | True => pure $ Right (True, reverse acc)
        case offset of
-            (S offset') => (fSeekLine h *> readLinesOnto acc offset' (More fuel) h) @{Applicative.Compose}
-            0           => (fGetLine h >>= \str => readLinesOnto (str :: acc) 0 fuel h) @{Monad.Compose}
+            (S offset') => (fSeekLine h *> readLinesOnto acc offset' (More fuel) h) @{Apply.Compose}
+            0           => (fGetLine h >>= \str => readLinesOnto (str :: acc) 0 fuel h) @{Monad.ComposeBind}
 
 ||| Read a chunk of a file in a line-delimited fashion.
 ||| You can use this function to read an entire file
